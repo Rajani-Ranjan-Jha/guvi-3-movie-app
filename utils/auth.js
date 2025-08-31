@@ -4,7 +4,6 @@ import ConnectToDB from "./connect";
 import User from "@/models/user";
 
 export const authOptions = {
-  // adapter: MongoDBAdapter(clientPromise),
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -21,6 +20,8 @@ export const authOptions = {
           if (!credentials?.email || !credentials?.password) {
             throw new Error("Missing email or password");
           }
+
+          // console.log("arrived in next-auth:",credentials?.email, credentials?.password)
 
           const user = await User.findOne({ email: credentials.email }).select(
             "+password"
@@ -46,7 +47,7 @@ export const authOptions = {
           }
 
           return {
-            name: user.name,
+            username: user.username,
             id: user._id.toString(),
             email: user.email,
           };
@@ -69,16 +70,17 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.name = user.name;
+        token.username = user.username;
         token.email = user.email;
-
       }
+      // console.log("Token in Auth:",token)
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
-      session.user.name = token.name;
+      session.user.username = token.username;
       session.user.email = token.email;
+      // console.log("session in Auth:",session)
       return session;
     },
   },
@@ -90,6 +92,7 @@ export const authOptions = {
   pages: {
     signIn: "/login",
     signUp: "/register",
+    error: "/api/auth/error",
   },
   debug: process.env.NODE_ENV === "development",
 };

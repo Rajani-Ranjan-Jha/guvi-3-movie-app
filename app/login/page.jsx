@@ -8,6 +8,7 @@ import { EyeClosedIcon, EyeIcon } from 'lucide-react';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const [EyeBtn, setEyeBtn] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -28,6 +29,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setErrorMessage('');
         const result = await signIn("credentials", {
             email,
             password,
@@ -35,12 +37,12 @@ const Login = () => {
         });
 
         if (result?.error) {
-            console.error(result.error);
+            setErrorMessage(result.error);
             setLoading(false);
         } else {
             console.warn('Logged in successfully');
             router.push("/");
-            
+
         }
     };
 
@@ -63,6 +65,9 @@ const Login = () => {
                             {EyeBtn ? (<EyeClosedIcon/>) : (<EyeIcon />)}
                         </button>
                     </div>
+                    {errorMessage && (
+                        <p className="text-red-500 mt-2">{errorMessage}</p>
+                    )}
                     <button type="submit" disabled={loading} className='mt-4 bg-blue-600 px-4 py-2 rounded-md text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400 transition-colors'>{loading ? 'Loading...' : "Login"}</button>
                 </form>
                 <p className='text-white mt-4'>Don't have an account? <a href="/register" className='text-blue-500 hover:underline'>Create a new account</a></p>
