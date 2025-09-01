@@ -2,11 +2,16 @@ import Image from "next/image";
 import Movie from "./components/Movie";
 import Navbar from "./components/Navbar";
 import TrendingThisWeek from "./components/TrendingThisWeek";
+import CreateNewReview from "./components/CreateNewReview";
 
 export default function Home() {
   return (
     <div className=" h-screen">
       <Navbar/>
+      {/* <CreateNewReview/>
+      <br />
+      <br />
+      <br /> */}
       <Movie movieCategory={'anime'}/>
       <br />
       <br />
