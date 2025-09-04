@@ -21,9 +21,12 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  playlist: {
-    type: Array,
-  },
+  watchlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Watchlist",
+      },
+    ],
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
