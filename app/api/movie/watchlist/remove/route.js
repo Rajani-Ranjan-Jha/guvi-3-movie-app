@@ -4,9 +4,9 @@ import Watchlist from "@/models/watchlist";
 import User from "@/models/user";
 
 export async function POST(request) {
-  const { user_email, movie_id } = await request.json();
+  const { user_email, media_id } = await request.json();
 
-  if (!user_email || !movie_id) {
+  if (!user_email || !media_id) {
     return NextResponse.json(
       { error: "User and Movie ID is required" },
       { status: 400 }
@@ -25,7 +25,7 @@ export async function POST(request) {
     }
 
     // finding the watchlist and deleting
-    const WatchListMovie = await Watchlist.findOneAndDelete({ user_id: existingUser._id, movie_id: movie_id });
+    const WatchListMovie = await Watchlist.findOneAndDelete({ user_id: existingUser._id, media_id: media_id });
     // if (!WatchListMovie || WatchListMovie.length === 0) {
     //   return NextResponse.json(
     //     {

@@ -6,8 +6,8 @@ import Watchlist from "@/models/watchlist";
 import User from "@/models/user";
 
 export async function POST(request) {
-  const { movie_id, user_email, movie_data } = await request.json();
-  if (!movie_id || !user_email || !movie_data) {
+  const {media_type, media_id, user_email, media_data } = await request.json();
+  if (!media_type || !media_id || !user_email || !media_data) {
     return NextResponse.json(
       { error: "All fields are required" },
       { status: 400 }
@@ -28,8 +28,9 @@ export async function POST(request) {
     }
 
     const newWatchList = await Watchlist({
-      movie_id: movie_id,
-      movie_data: movie_data,
+      media_id: media_id,
+      media_type: media_type,
+      media_data: media_data,
       user_id: existingUser._id,
     });
 

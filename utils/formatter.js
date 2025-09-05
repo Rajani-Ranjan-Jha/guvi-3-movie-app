@@ -9,13 +9,20 @@ export function formatMinutes(input) {
   return `${hour}h ${minute}m`;
 }
 
-export function formatNumber(price) {
+export function formatCurrency(price) {
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(price);
   
   return formattedPrice
+}
+
+export function formatNumber(number) {
+  if(number < 1000){
+    return number
+  }
+  return `${(number/1000).toFixed(1)}k`
 }
 
 

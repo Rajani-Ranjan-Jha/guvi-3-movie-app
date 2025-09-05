@@ -29,7 +29,7 @@ export const ContextProvider = ({ children }) => {
             const data = await res.json();
             const user = data?.user;
             if (user) {
-                const req = await fetch(`api/movie/watchlist/get?email=${user.email}`, {
+                const req = await fetch(`/api/movie/watchlist/get?email=${user.email}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

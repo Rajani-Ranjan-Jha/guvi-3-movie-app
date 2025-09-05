@@ -48,7 +48,7 @@ body {
 .handle-scroll {
   scroll-behavior: smooth;
   /* scrollbar-color: rgb(156, 155, 155) transparent; */
-  scrollbar-color: red transparent;
+  scrollbar-color: white transparent;
 }
 
 /* WebKit browsers */

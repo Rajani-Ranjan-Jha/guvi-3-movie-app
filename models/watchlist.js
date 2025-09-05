@@ -1,7 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const watchlistSchema = new Schema({
-  movie_id: {
+  media_id: {
+    type: String,
+    required: true,
+  },
+  media_type: {
     type: String,
     required: true,
   },
@@ -10,7 +14,7 @@ const watchlistSchema = new Schema({
       ref: "User",
       required: true,
   },
-  movie_data: {
+  media_data: {
     type: Object,
     required: true
   },

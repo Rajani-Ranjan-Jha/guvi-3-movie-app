@@ -1,21 +1,22 @@
-import { searchMovieById } from "../handlers/movieDetails";
+import { getMediaById } from "../handlers/movieDetails";
 
-export async function addToWatchList(movieId, userEmail) {
+export async function addToWatchList(mediaId, mediaType='movie', userEmail) {
   try {
-    const movieData = await searchMovieById(movieId)
-    if(!movieData){
+    const mediaData = await getMediaById(mediaId, mediaType)
+    if(!mediaData){
       console.warn("Unable to fetch movie data[addToWatchList]")
       return false
     }
-    const req = await fetch("api/movie/watchlist/add", {
+    const req = await fetch("/api/movie/watchlist/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-          movie_id: movieId,
+          media_id: mediaId,
+          media_type: mediaType,
           user_email: userEmail,
-          movie_data: movieData
+          media_data: mediaData
       })
     });
   
@@ -32,7 +33,7 @@ export async function addToWatchList(movieId, userEmail) {
 }
 export async function getWatchList(userEmail, watchlist, setWatchlist) {
   try {
-    const req = await fetch(`api/movie/watchlist/get?email=${userEmail}`, {
+    const req = await fetch(`/api/movie/watchlist/get?email=${userEmail}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -51,16 +52,16 @@ export async function getWatchList(userEmail, watchlist, setWatchlist) {
     
   }
 }
-export async function removeFromWatchList(userEmail, movieId) {
+export async function removeFromWatchList(mediaId, userEmail) {
   try {
-    const req = await fetch("api/movie/watchlist/remove", {
+    const req = await fetch("/api/movie/watchlist/remove", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         user_email: userEmail,
-        movie_id: movieId
+        media_id: mediaId
       })
     });
   
@@ -76,8 +77,8 @@ export async function removeFromWatchList(userEmail, movieId) {
   }
 }
 
-export async function getTrailerLink (movieId) {
-        const url = `https://api.themoviedb.org/3/movie/${movieId}/videos?language=en-US`;
+export async function getTrailerLink (mediaId) {
+        const url = `https://api.themoviedb.org/3/movie/${mediaId}/videos?language=en-US`;
         const options = {
             method: 'GET',
             headers: {
