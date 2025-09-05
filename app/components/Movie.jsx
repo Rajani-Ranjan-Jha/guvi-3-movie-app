@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, Plus, Play, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import imdb from '@/public/imdb/imdb250.json'
+import { addToWatchList, getTrailerLink } from './action';
+import { useUserContext } from '../context/contextProvider';
 
 
 const MovieCarousel = ({
@@ -11,11 +13,29 @@ const MovieCarousel = ({
     listLength = 10,
     movieCategory
 }) => {
+
+
+    const context = useUserContext()
+    const [user, setUser] = useState()
+    const [userWatchlist, setUserWatchlist] = useState()
+    const [Movies, setMovies] = useState()
+
     const scrollContainerRef = useRef(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(true);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const router = useRouter()
+
+
+    const loadUserfromContext = () => {
+        if(!context || !context.user){
+            console.error("Didnot get user from the context!")
+            return
+        }
+        setUser(context.user)
+        // console.warn(context)
+        setUserWatchlist(context.watchlist)
+    }
 
 
     // Sample movie data
@@ -77,7 +97,7 @@ const MovieCarousel = ({
             rank: 8
         }
     ];
-    const [Movies, setMovies] = useState(movies)
+
 
 
     const checkScrollPosition = () => {
@@ -90,11 +110,6 @@ const MovieCarousel = ({
         setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
     };
 
-    const loadIMDB = () => {
-        const lorem = imdb.slice(0, 10)
-        // console.log("lorem:", lorem)
-        setMovies(lorem)
-    }
 
     const loadByCategory = async () => {
         setLoading(true)
@@ -137,7 +152,7 @@ const MovieCarousel = ({
             try {
                 const res = await fetch(url, options)
                 const data = await res.json()
-                console.log(`output for ${movieCategory}`, data.results)
+                // console.log(`output for ${movieCategory}`, data.results)
                 setMovies(data.results)
 
             } catch (error) {
@@ -146,13 +161,15 @@ const MovieCarousel = ({
             }
         } else {
             console.warn("no category provided, loading random movies")
-            loadIMDB()
+            const custom = imdb.slice(0, 10)
+            setMovies(custom)
         }
         setLoading(false)
         return
     }
 
     useEffect(() => {
+        loadUserfromContext()
         loadByCategory()
         checkScrollPosition();
         const container = scrollContainerRef.current;
@@ -173,11 +190,28 @@ const MovieCarousel = ({
         });
     };
 
-    const handleMovieClick = (id) =>{
-        router.push(`/title/${id}`)
+    const handleMovieClick = (id) => {
+        router.push(`/movie/${id}`)
     }
 
-    if (loading) {
+    const handleAddWatchList = async (movie) => {
+        const btn = document.getElementById('watchlist-btn')
+        console.log('wathclist clicked!')
+        const result = await addToWatchList(movie.id, 'movie', user.email)
+        if (!result) {
+            alert("Failded to add watchlist")
+            return
+        }
+        alert('ADDED TO WATCHLIST!')
+        btn.innerText = 'Added'
+    }
+
+    const handleTrailerClick = async (movieId) =>{
+        const TrailerObj = await getTrailerLink(movieId)
+        window.open(`https://www.youtube.com/watch?v=${TrailerObj.key}`, '_blank')
+    }
+
+    if (loading || !userWatchlist) {
         return (
             <div className='h-15 bg-slate-900 text-white text-2xl text-center'>
                 Loading...
@@ -226,10 +260,15 @@ const MovieCarousel = ({
                             <div
                                 key={movie.id}
                                 className="w-64 h-170 flex-shrink-0 flex-col justify-between items-center  bg-gray-800 rounded-lg overflow-hidden  transition-transform duration-200 cursor-pointer group"
-                                onClick={() => handleMovieClick(movie.id)}
+
                             >
                                 {/* Movie Poster */}
-                                <div className="relative">
+                                <div className="relative"
+
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleMovieClick(movie.id)
+                                    }}>
                                     <img
                                         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                                         alt={movie.original_title}
@@ -237,7 +276,8 @@ const MovieCarousel = ({
                                     />
 
                                     {/* Watchlist Button */}
-                                    <button className="absolute top-3 left-3 bg-black bg-opacity-60 hover:bg-opacity-80 p-2 rounded-full transition-all duration-200">
+                                    <button className="absolute top-3 left-3 bg-black bg-opacity-60 hover:bg-opacity-80 p-2 rounded-full transition-all duration-200"
+                                        onClick={() => handleAddWatchList(movie)}>
                                         <Plus size={20} className="text-white" />
                                     </button>
 
@@ -265,20 +305,26 @@ const MovieCarousel = ({
                                         {/* Title with Rank */}
                                         <div className="mb-3">
                                             <h3 className="text-white font-medium text-lg leading-tight">
-                                                {index + 1}. {movie.original_title}
+                                                {index + 1}. {movie.title}
                                             </h3>
                                         </div>
                                     </div>
 
                                     {/* Action Buttons */}
                                     <div className="space-y-2 border-2 border-red-600">
-                                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm font-medium transition-colors duration-200">
-                                            + Watchlist
+                                        <button id='watchlist-btn' className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm font-medium transition-colors duration-200"
+                                            onClick={() => handleAddWatchList(movie)}>
+                                            {`${userWatchlist  && userWatchlist.find((list) => list.movie_id == movie.id) ? 'Added' : '+ Watchlist'}`}
                                         </button>
-                                        <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+
+                                        <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                                        onClick={() => handleTrailerClick(movie.id)}
+                                        
+                                        >
                                             <Play size={14} />
                                             Trailer
                                         </button>
+
                                         <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded text-sm font-medium transition-colors duration-200">
                                             Watch options
                                         </button>

@@ -1,156 +1,104 @@
 'use client'
-import { ArrowRight, ChevronRight, ImagesIcon, ListVideo, Plus, StarIcon, User } from 'lucide-react'
+import { ArrowRight, BookmarkCheck, BookmarkPlus, ChevronRight, ImagesIcon, ListVideo, Plus, StarIcon, User } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { formatMinutes, formatNumber } from '@/utils/formatter'
+import { formatMinutes, formatCurrency } from '@/utils/formatter'
 import CreateNewReview from '@/app/components/CreateNewReview'
+import { addToWatchList, removeFromWatchList } from '@/app/components/action'
+import { useUserContext } from '@/app/context/contextProvider'
+import { getMediaById, getMediaCredits, getMediaPictures, getMediaReviews, getMediaVideos, getMediaWatchProviders } from '@/app/handlers/movieDetails'
 
-const MovieInfo = () => {
+
+const MOVIE = () => {
 
     const { id } = useParams()
+    const context = useUserContext()
     const [user, setUser] = useState({})
-    const [Details, setDetails] = useState()
     const [loading, setloading] = useState(false)
     const [LoadingReviews, setLoadingReviews] = useState(false)
     const [reviewBtn, setreviewBtn] = useState(false)
     const [isFirstReview, setIsFirstReview] = useState(true)
+    const [isAlreadyInWatchlist, setIsAlreadyInWatchlist] = useState(false)
 
+    const [movieDetails, setMovieDetails] = useState()
     const [movieTrailer, setMovieTrailer] = useState([])
     const [movieCasts, setMovieCasts] = useState([])
     const [movieDirectors, setMovieDirectors] = useState([])
     const [movieWriters, setMovieWriters] = useState([])
     const [movieProvidors, setMovieProvidors] = useState({})
 
-    const [movieVideos, setmovieVideos] = useState([])
-    const [moviePictures, setmoviePictures] = useState([])
-
+    const [movieVideos, setMovieVideos] = useState([])
+    const [moviePictures, setMoviePictures] = useState([])
     const [movieReviews, setMovieReviews] = useState()
 
 
-    const loadUserfromSession = async () => {
-        try {
-            const res = await fetch("/api/auth/session");
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            const data = await res.json();
-            const user = data?.user;
-            setUser(user)
-            // console.log("User:", user);
-            return user;
-        } catch (error) {
-            console.error("Error loading current user:", error);
-            return null;
+    const loadUserfromContext = () => {
+        if (!context || !context.user) {
+            console.warn("Didnot get user from the context(movie/page.jsx)!")
+            return
         }
+        setUser(context.user)
+        // console.warn(context)
+        const watchlist = context.watchlist
+        console.log("watchlist:", watchlist)
+        watchlist.find((list) => list.media_id == id) ? setIsAlreadyInWatchlist(true) : setIsAlreadyInWatchlist(false)
     }
 
-    const FetchMovieDetails = async () => {
+    const loadMovieDetails = async (movieId) => {
         setloading(true)
-        const url = `https://api.themoviedb.org/3/movie/${id}?language=en-US`;
-        const options = {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0ZmZhZjVmODE5NGQwNDgxMTUyMGMzYmQxNTcyM2M4NyIsIm5iZiI6MTc1NjM0NzM2Ny4yNTcsInN1YiI6IjY4YWZiYmU3ZjRmOTBjY2Y0ZDYyNGViZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.GsKLnV0dmDEJQhcU_u6Vu8KS-ZnOGgIcAxAPvLAYA18'
-            }
-        };
-
-        fetch(url, options)
-            .then(res => res.json())
-            .then(json => setDetails(json))
-            .catch(err => console.error(err));
-
+        const output = await getMediaById(movieId, 'movie')
+        //console.log(output)
+        setMovieDetails(output)
         setloading(false)
 
     }
-    const getTrailerLink = async (movieId) => {
-        const url = `https://api.themoviedb.org/3/movie/${movieId}/videos?language=en-US`;
-        const options = {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0ZmZhZjVmODE5NGQwNDgxMTUyMGMzYmQxNTcyM2M4NyIsIm5iZiI6MTc1NjM0NzM2Ny4yNTcsInN1YiI6IjY4YWZiYmU3ZjRmOTBjY2Y0ZDYyNGViZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.GsKLnV0dmDEJQhcU_u6Vu8KS-ZnOGgIcAxAPvLAYA18'
-            }
-        };
-        try {
-            const res = await fetch(url, options);
-            const data = await res.json()
-            setmovieVideos(data.results)
-            const filtered = data.results.filter((i) => i.type == 'Trailer' && i.site == 'YouTube')
-            // console.log(data)
-            // console.log(filtered)
-            setMovieTrailer(filtered)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-    const getMoviePictures = async (movieId) => {
-        const url = `https://api.themoviedb.org/3/movie/${movieId}/images?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`;
-        try {
-            const res = await fetch(url);
-            const data = await res.json()
-            // console.log(data.backdrops)
-            setmoviePictures(data.backdrops)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-    const getDirectors = async (movieId) => {
-        const url = `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`;
-        try {
-            const res = await fetch(url);
-            const data = await res.json()
-            const directors = data.crew.filter((i) => i.job == 'Director')
-            const writers = data.crew.filter((i) => i.job == 'Writer')
-            // console.log("Directors:",directors)
-            // console.log("writers:",writers)
-            // console.log("Casters:", data.cast)
-            setMovieCasts(data.cast)
-            setMovieDirectors(directors)
-            setMovieWriters(writers)
 
-        } catch (error) {
-            console.error(error)
-        }
-    }
-    const getWatchProviders = async (movieId) => {
-        const url = `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`;
-        try {
-            const res = await fetch(url);
-            const data = await res.json()
-            // console.log(data.results)
-            setMovieProvidors(data.results)
+    const loadMovieVideos = async (movieId) => {
+        const output = await getMediaVideos(movieId, 'movie')
+        //console.log(output)
+        const filtered = await output.filter(
+            (i) => i.type == "Trailer" && i.site == "YouTube"
+        );
+        setMovieTrailer(filtered)
+        setMovieVideos(output)
 
-        } catch (error) {
-            console.error(error)
-
-        }
-    }
-    const getMovieReviews = async (movieId) => {
-        const url = `https://api.themoviedb.org/3/movie/${movieId}/reviews?language=en-US&page=1`;
-        const options = {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0ZmZhZjVmODE5NGQwNDgxMTUyMGMzYmQxNTcyM2M4NyIsIm5iZiI6MTc1NjM0NzM2Ny4yNTcsInN1YiI6IjY4YWZiYmU3ZjRmOTBjY2Y0ZDYyNGViZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.GsKLnV0dmDEJQhcU_u6Vu8KS-ZnOGgIcAxAPvLAYA18'
-            }
-        };
-
-        try {
-            const res = await fetch(url, options)
-            const data = await res.json()
-            console.log("Setting Reviews:", data.results)
-            return data.results
-        } catch (error) {
-            console.error(error)
-            return []
-        }
     }
 
+    const loadMoviePictures = async (movieId) => {
+        const output = await getMediaPictures(movieId, 'movie')
+        //console.log(output)
+        setMoviePictures(output)
+
+    }
+
+    const loadMovieCredits = async (movieId) => {
+        const output = await getMediaCredits(movieId, 'movie')
+        //console.log(output)
+        setMovieCasts(output.casts)
+        setMovieDirectors(output.directors)
+        setMovieWriters(output.writers)
+
+    }
+
+    const loadMovieWatchProviders = async (movieId) => {
+        const output = await getMediaWatchProviders(movieId, 'movie')
+        //console.log(output)
+        setMovieProvidors(output)
+
+    }
+
+    const loadMovieReviews = async (movieId) => {
+        const output = await getMediaReviews(movieId, 'movie')
+        //console.log(output)
+        setMovieReviews(output)
+
+    }
+
+    //
     const addMovieInfoToDB = async (movieId) => {
         try {
-            const reviews = await getMovieReviews(movieId);
+            const reviews = await getMediaReviews(movieId, 'movie');
             if (!reviews || reviews.length === 0) {
                 console.warn("No reviews fetched from TMDB to add to DB");
                 return [];
@@ -162,14 +110,15 @@ const MovieInfo = () => {
                 },
                 body: JSON.stringify({
                     tmdb_id: movieId,
-                    tmdb_rating: Details?.vote_average,
+                    tmdb_rating: movieDetails?.vote_average,
                     reviews: reviews,
                 })
             })
 
             const res = await req.json()
             if (res.status != 200) {
-                console.warn("failed in [addMovieInfoToDB]", res.status)
+                console.warn(`${res.message}, status: ${res.status}`)
+
                 return false;
             }
             console.warn("Added to the local db:", reviews)
@@ -209,28 +158,44 @@ const MovieInfo = () => {
         }
     }
 
+    const handleAddRemoveWatchList = async (movieId) => {
+        const result = isAlreadyInWatchlist ? await removeFromWatchList(movieId, user.email) : await addToWatchList(movieId, 'movie', user.email)
+        if (!result) {
+            alert("Failded to add watchlist")
+            return
+        }
+        // alert('ADDED TO WATCHLIST!')
+        setIsAlreadyInWatchlist(!isAlreadyInWatchlist)
+    }
+
     useEffect(() => {
         if (id) {
-            loadUserfromSession()
-            FetchMovieDetails()
-            getTrailerLink(id)
-            getMoviePictures(id)
-            getDirectors(id)
-            getWatchProviders(id)
+            loadUserfromContext()
+            loadMovieDetails(id)
+            loadMovieVideos(id)
+            loadMoviePictures(id)
+            loadMovieCredits(id)
+            loadMovieWatchProviders(id)
+            // loadMovieReviews(id)
+            // getTrailerLink(id)
+            // getMoviePictures(id)
+            // getDirectors(id)
+            // getWatchProviders(id)
 
         }
     }, [])
 
 
     useEffect(() => {
-        if (!Details || Details.length === 0) {
-            console.warn("dont have movie details right now")
+        // console.log(movieDetails)
+        if (!movieDetails || movieDetails.length === 0) {
+            // console.warn("dont have movie details right now")
             return
         }
         loadMovieReviewsFromDB(id)
 
 
-    }, [Details])
+    }, [movieDetails])
 
     useEffect(() => {
         if (movieReviews && user.username) {
@@ -253,9 +218,11 @@ const MovieInfo = () => {
 
     if (loading) {
         return (
-            <div className='h-15 bg-slate-900 text-white text-2xl text-center'>
-                Loading...
+            <div className="w-full h-screen flex flex-col justify-center items-center ">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                <p className="text-gray-300">Loading...</p>
             </div>
+
         )
     }
 
@@ -263,18 +230,35 @@ const MovieInfo = () => {
 
     return (
         <>
-            {Details && (
+            {movieDetails && (
 
                 <div className='relative w-full h-full bg-slate-900 flex p-10'>
                     <div className='w-4/5 p-5 gap-5 flex flex-col border-2 border-blue-500 mx-auto'>
                         <div className='p-5'>
-                            <h2 className='text-white text-5xl'>{Details.title}</h2>
+                            <div className='w-full flex justify-between items-center'>
+                                <h2 className='text-white text-5xl'>{movieDetails.title}</h2>
+                                <button id='watchlist-btn' className='flex items-center gap-1 px-2 py-2 hover:bg-white/20 cursor-pointer text-sm rounded-lg'
+                                    onClick={() => { handleAddRemoveWatchList(movieDetails.id) }}>
+                                    {isAlreadyInWatchlist ? (
+                                        <>
+                                            <span><BookmarkCheck /></span>
+                                            <span>Remove from Watchlist</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span><BookmarkPlus /></span>
+                                            <span>Add to Watchlist</span>
+                                        </>
+                                    )}
+
+                                </button>
+                            </div>
                             <div className='flex gap-3 mt-2'>
                                 <span className='bg-gray-700 text-center p-2 py-1 text-xs rounded-md'>
-                                    {new Date(Details.release_date).getFullYear()}
+                                    {new Date(movieDetails.release_date).getFullYear()}
                                 </span>
                                 <span className='bg-gray-700 text-center p-2 py-1 text-xs rounded-md'>
-                                    {formatMinutes(Details.runtime)}
+                                    {formatMinutes(movieDetails.runtime)}
                                 </span>
                             </div>
                         </div>
@@ -284,8 +268,8 @@ const MovieInfo = () => {
                             {/* image div */}
                             <div className='w-1/4'>
                                 <img
-                                    src={`https://image.tmdb.org/t/p/w500${Details?.poster_path}`}
-                                    alt={Details?.title}
+                                    src={`https://image.tmdb.org/t/p/w500${movieDetails?.poster_path}`}
+                                    alt={movieDetails?.title}
                                     className="w-full object-cover"
                                 />
                             </div>
@@ -299,7 +283,7 @@ const MovieInfo = () => {
 
                                             src={`https://www.youtube.com/embed/${movieTrailer[0].key}?autoplay=0&mute=1`}
 
-                                            title={`${Details.original_title} ${movieTrailer[0].name}`}>
+                                            title={`${movieDetails.original_title} ${movieTrailer[0].name}`}>
 
                                         </iframe>
 
@@ -329,7 +313,7 @@ const MovieInfo = () => {
 
                             {/* genres */}
                             <div className='w-full flex flex-wrap gap-2 p-2'>
-                                {Details.genres.map((g, i) => (
+                                {movieDetails.genres.map((g, i) => (
                                     <div className='px-2 py-1 text-xs hover:bg-white/20 text-center rounded-2xl border-1 border-slate-100' key={g.id}>{g.name}</div>
                                 ))
                                 }
@@ -337,7 +321,7 @@ const MovieInfo = () => {
 
                             {/* description */}
                             <div className='p-2 text-sm'>
-                                {Details.overview}
+                                {movieDetails.overview}
                             </div>
 
 
@@ -350,30 +334,32 @@ const MovieInfo = () => {
 
                                 {/* writer */}
                                 <div className='space-x-3 border-t-1 border-t-gray-500 p-2 py-1 text-sm'>
-                                    Writer: {movieWriters.length > 0 && (
+                                    Writer: {movieWriters.length > 0 ? (
                                         movieWriters.map((w, i) =>
-                                        (<a src='youtube.com' key={w.id}>
+                                        (<span key={w.id}>
                                             {w.name}
-                                        </a>))
+                                        </span>))
+                                    ) : (
+                                        <span> Not Found</span>
                                     )}
                                 </div>
 
-                                {Details.status == 'Released' && (
+                                {movieDetails.status == 'Released' && (
                                     <div className='border-t-1 border-t-gray-500 p-2 py-1 text-sm'>
-                                        Release Date: {Details.release_date}
+                                        Release Date: {movieDetails.release_date}
                                     </div>
                                 )}
                                 <div className='border-t-1 border-t-gray-500 p-2 py-1 text-sm'>
-                                    {`Rating: ${Details.vote_average} (${Details.vote_count})`}
+                                    {`Rating: ${movieDetails.vote_average} (${movieDetails.vote_count})`}
                                 </div>
                                 <div className='border-t-1 border-t-gray-500 p-2 py-1 text-sm'>
-                                    Runtime: {formatMinutes(Details.runtime)}
+                                    Runtime: {formatMinutes(movieDetails.runtime)}
                                 </div>
                                 <div className='border-t-1 border-t-gray-500 p-2 py-1 text-sm'>
-                                    Budget: {formatNumber(Details.budget)} USD
+                                    Budget: {formatCurrency(movieDetails.budget)} USD
                                 </div>
                                 <div className='border-t-1 border-t-gray-500 p-2 py-1 text-sm'>
-                                    Revenue: {formatNumber(Details.revenue)} USD
+                                    Revenue: {formatCurrency(movieDetails.revenue)} USD
                                 </div>
 
                             </div>
@@ -383,13 +369,13 @@ const MovieInfo = () => {
 
                             {/* OTT providers */}
                             <div className='w-full'>
-                                <h2 className='font-semibold text-2xl mb-4'>OTT Providers:</h2>
-                                <div className='w-full flex flex-wrap gap-2 justify-start items-center'>
+                                <h2 className='font-semibold text-2xl mb-2'>OTT Providers:</h2>
+                                <div className='w-full h-50 flex flex-row gap-2 justify-start items-center overflow-x-auto handle-scroll border-b-1 border-t-1'>
                                     {movieProvidors.IN && movieProvidors.IN.rent ? (movieProvidors?.IN?.rent.map((provider, index) =>
                                         <div
-                                            className='w-1/4 flex flex-col justify-center items-center gap-2' key={provider.provider_id}>
+                                            className='flex-shrink-0 w-50 flex flex-col justify-center items-center gap-0 border-1 border-white px-4 py-2 rounded-lg hover:bg-white/20' key={provider.provider_id}>
                                             {provider.logo_path ? (<img
-                                                className='w-25 h-25 rounded-full border-2 border-white object-cover' src={`https://image.tmdb.org/t/p/w500${provider?.logo_path}`} alt={provider.provider_name} />) :
+                                                className='w-full h-25  object-contain' src={`https://image.tmdb.org/t/p/w500${provider?.logo_path}`} alt={provider.provider_name} />) :
                                                 (<User className='w-25 h-25 font-extralight  rounded-full border-2 border-white' />)}
 
                                             <span className='text-center font-bold'>{provider.provider_name}</span>
@@ -443,17 +429,17 @@ const MovieInfo = () => {
                                     </div>
                                     <button className='flex items-center text-sm text-blue-500 px-2 py-1 rounded-md hover:bg-blue-500/20 cursor-pointer'
                                         onClick={() => setreviewBtn(true)}>
-                                        <Plus className='text-sm mr-1' size={15} /> {`${isFirstReview ? 'review':'update'}`}
+                                        <Plus className='text-sm mr-1' size={15} /> {`${isFirstReview ? 'review' : 'update'}`}
                                     </button>
                                 </div>
                                 <div className='flex flex-col justify-center items-start gap-2 text-3xl py-2'>
                                     <div className='flex items-center gap-2'>
                                         <StarIcon size={35} className="text-yellow-400 fill-current" />
                                         <span>
-                                            {`${Details.vote_average.toFixed(2)}`}
+                                            {`${movieDetails.vote_average.toFixed(2)}`}
                                         </span>
                                         <small className='text-xs'>
-                                            {Details.vote_count}
+                                            {movieDetails.vote_count}
                                         </small>
                                     </div>
                                 </div>
@@ -461,7 +447,8 @@ const MovieInfo = () => {
                                     <h1 className="text-xl font-semibold mb-2">Featured reviews</h1>
                                     <div className='w-full h-52 flex flex-row space-x-4 overflow-x-auto handle-scroll px-2 py-2'>
                                         {movieReviews && movieReviews.length > 0 ? (movieReviews.map((review, index) => {
-                                            return renderReviews(review,index)}))
+                                            return renderReviews(review, index)
+                                        }))
                                             : ((LoadingReviews ? (
                                                 <p className='mx-auto text-white'>
                                                     Loading reviews...
@@ -484,7 +471,7 @@ const MovieInfo = () => {
 
                             <div className='w-200 mx-auto'
                                 onClick={(e) => e.stopPropagation()}>
-                                <CreateNewReview tmdb_id={id} tmdb_rating={Details.vote_average} isFirstReview={isFirstReview} previousReview={movieReviews.find(r => r.author === user.username)} />
+                                <CreateNewReview tmdb_id={id} tmdb_rating={movieDetails.vote_average} isFirstReview={isFirstReview} previousReview={movieReviews.find(r => r.author === user.username)} />
 
                             </div>
 
@@ -497,4 +484,4 @@ const MovieInfo = () => {
     )
 }
 
-export default MovieInfo
+export default MOVIE
