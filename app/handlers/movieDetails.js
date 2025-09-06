@@ -1,5 +1,44 @@
 const TMDB_TOKEN = process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN;
 
+export async function getMediaByCategory(mediaCategory, mediaType) {
+  let url =
+    `https://api.themoviedb.org/3/${mediaType}/${mediaCategory}?language=en-US&page=1`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization:
+        `Bearer ${TMDB_TOKEN}`,
+    },
+  };
+
+  switch (mediaCategory) {
+    case 'trending_day':
+      url = `https://api.themoviedb.org/3/trending/${mediaType}/day?language=en-US`;
+      break;
+    case 'trending_week':
+      url = `https://api.themoviedb.org/3/trending/${mediaType}/week?language=en-US`;
+      break;
+    case 'top_grossing':
+      url = `https://api.themoviedb.org/3/discover/${mediaType}?sort_by=revenue.desc?language=en-US&page=1`;
+      break;
+    case 'anime':
+      url = `https://api.themoviedb.org/3/discover/${mediaType}?with_genres=16?language=en-US&page=1`;
+      break;
+  
+    default:
+      break;
+  }
+  try {
+    const res = await fetch(url, options);
+    const data = await res.json();
+    // console.log(data.results)
+    return data.results;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 export async function getMediaById(mediaId, mediaType) {
   const url = `https://api.themoviedb.org/3/${mediaType}/${mediaId}?language=en-US`;
   const options = {
@@ -31,14 +70,14 @@ export async function getMediaVideos(mediaId, mediaType) {
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-    
+
     // console.log(data)
     // console.log(filtered)
     // console.log(data.results);
-    return data.results
+    return data.results;
   } catch (error) {
     console.error(error);
-    return null
+    return null;
   }
 }
 export async function getMediaPictures(mediaId, mediaType) {
@@ -55,10 +94,10 @@ export async function getMediaPictures(mediaId, mediaType) {
     const res = await fetch(url, options);
     const data = await res.json();
     // console.log(data.backdrops);
-    return data.backdrops
+    return data.backdrops;
   } catch (error) {
     console.error(error);
-    return null
+    return null;
   }
 }
 export async function getMediaCredits(mediaId, mediaType) {
@@ -93,7 +132,7 @@ export async function getMediaCredits(mediaId, mediaType) {
     });
 
     // console.log({ casts, directors, writers });
-    console.log(data)
+    console.log(data);
     return { casts, directors, writers };
     // return data
   } catch (error) {
@@ -113,12 +152,12 @@ export async function getMediaWatchProviders(mediaId, mediaType) {
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-        console.log("OTT (action.js):",data.results);
+    console.log("OTT (action.js):", data.results);
 
-    return data.results
+    return data.results;
   } catch (error) {
     console.error(error);
-    return null
+    return null;
   }
 }
 export async function getMediaReviews(mediaId, mediaType) {
@@ -128,15 +167,14 @@ export async function getMediaReviews(mediaId, mediaType) {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization:
-        `Bearer ${TMDB_TOKEN}`,
+      Authorization: `Bearer ${TMDB_TOKEN}`,
     },
   };
 
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-    console.log("Reviews (action.js):",data.results);
+    console.log("Reviews (action.js):", data.results);
     return data.results;
   } catch (error) {
     console.error(error);
