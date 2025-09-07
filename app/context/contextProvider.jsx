@@ -1,6 +1,7 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from "react";
-import { getWatchList } from "../components/action";
+import { useSession } from "next-auth/react";
+
 
 const UserContext = createContext()
 
@@ -13,81 +14,53 @@ export const useUserContext = () => {
 };
 
 export const ContextProvider = ({ children }) => {
+    const { data: session, status } = useSession();
     const [user, setUser] = useState(null);
     const [watchlist, setWatchlist] = useState()
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const loadUserfromSession = async () => {
-        try {
+
+
+    // Update user state when session changes
+    useEffect(() => {
+        if (status === 'loading') {
             setLoading(true);
-            const res = await fetch("/api/auth/session");
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            const data = await res.json();
-            const user = data?.user;
-            if (user) {
-                const req = await fetch(`/api/movie/watchlist/get?email=${user.email}`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    }
-                });
-                const res = await req.json()
-                if (res.status != 201) {
-                    console.warn("context:",res.message)
-                }
-                setWatchlist(res.watchList)
+            return;
+        }
 
-            } else{
-                console.warn("NO user in loadUserfromSession")
-            }
-            setUser(user);
+        if (session?.user) {
+            setUser(session.user);
             setError(null);
-            setLoading(false);
-            return user;
-        } catch (error) {
-            console.error("Error loading current user:", error);
-            setError(error);
-            setUser(null);
-            setLoading(false);
-            return null;
-        }
-    };
+            setLoading(true);
 
-    const addWatchListInUser = async () => {
-        setLoading(true)
-        const result = await getWatchList(user.email, watchlist, setWatchlist)
-        if (!result) {
-            console.warn("Unable to get watchlist(context)")
-            setLoading(false)
-            return false
-        }
-        setLoading(false)
-        return true
-    }
-
-    useEffect(() => {
-        loadUserfromSession();
-    }, []);
-
-    useEffect(() => {
-        const fetchWatchlist = async () => {
-            if (user && user.email && !user.watchlist) {
-                const result = await addWatchListInUser();
-                if (result) {
-                    setUser({ ...user, watchlist });
-                } else {
-                    console.warn("Unable to get watchlist fetchWatchlist");
+            // Load watchlist for the user
+            const loadWatchlist = async () => {
+                try {
+                    const req = await fetch(`/api/movie/watchlist/get?email=${session.user.email}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        }
+                    });
+                    const res = await req.json()
+                    if (res.status != 201) {
+                        console.warn("context:", res.message)
+                    }
+                    setWatchlist(res.watchList)
+                    setLoading(false);
+                } catch (error) {
+                    console.error("Error loading watchlist:", error);
                 }
-            } else if (!user) {
-                console.warn("no user fetchWatchlist");
-            }
-        };
-        // fetchWatchlist();
-    }, [user]);
+            };
+            loadWatchlist();
+        } else {
+            setUser(null);
+            setWatchlist(null);
+            setLoading(false);
+        }
+    }, [session, status]);
 
     if (loading) {
         // Optionally, you can return a loading indicator here or null to prevent rendering children until user is loaded

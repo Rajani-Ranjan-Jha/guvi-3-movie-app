@@ -4,16 +4,21 @@ import { getWatchList, removeFromWatchList } from '../components/action'
 import { useUserContext } from '../context/contextProvider'
 import { Star, Trash2 } from 'lucide-react'
 import { formatMinutes, formatNumber } from '@/utils/formatter'
+import { useRouter } from 'next/navigation'
+import Navbar from '../components/Navbar'
 
 const WatchList = () => {
 
   const context = useUserContext()
   const [watchlist, setWatchlist] = useState()
+  const [loading, setLoading] = useState(true)
   const [movieCasts, setMovieCasts] = useState()
   const [movieDirectors, setMovieDirectors] = useState()
   const [movieWriters, setMovieWriters] = useState()
 
-  
+  const router = useRouter()
+
+
 
 
   const loadWatchListMovies = async (email) => {
@@ -22,6 +27,7 @@ const WatchList = () => {
       alert("Unable to get watchlist")
       return
     }
+    setLoading(false)
   }
 
   // const loadMovieCasts = async (movieId) => {
@@ -50,27 +56,45 @@ const WatchList = () => {
   }
 
   useEffect(() => {
-    if (context && context.user) {
-      // console.log(context.user)
+    if (!context || !context.user) {
+      router.push('/login')
+      return
+    } else{
       loadWatchListMovies(context.user.email)
     }
   }, [])
 
-  useEffect(() => {
-    if (watchlist && watchlist.length != 0) {
+  // useEffect(() => {
+  //   if (watchlist && watchlist.length != 0) {
+  //   }
+  // }, [watchlist])
 
-    }
-  }, [watchlist])
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black ">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+        <p className="text-gray-300">Loading Watchlist...</p>
+      </div>
+
+    )
+  }
+  if (!watchlist || watchlist.length === 0) {
+    return (
+      <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black ">
+        <p className="text-gray-300 text-2xl">No content found!</p>
+      </div>
+
+    )
+  }
 
 
   return (
-    <div className='w-full h-full bg-indigo-900 text-white flex flex-col'>
-      <h1 className='mx-auto text-center text-4xl py-5'>Your Watchlist</h1>
-      <div className='w-4/5 h-auto mx-auto border-2 border-red-600 flex flex-col gap-2 justify-start items-start'>
-        {watchlist && watchlist.length !== 0 ? (
-          watchlist.map((list, index) => {
-            // We cannot call async function directly inside map, so we use useEffect or handle it differently
-            // Here, we will just render the UI and assume media_data is already populated
+    <>
+    <Navbar/>
+    <div className='w-full h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black text-white flex flex-col transition-colors duration-500'>
+      <h1 className='mx-auto text-center text-4xl font-semibold py-5'>Your Watchlist</h1>
+      <div className='w-4/5 mx-auto flex flex-col gap-2 justify-start items-start'>
+          {watchlist.map((list, index) => {
             return (
               <div className='flex flex-col p-3 rounded-2xl hover:bg-white/10 justify-start h-70 w-full border-1' key={list.media_id}>
                 <div className='h-4/5 flex items-start'>
@@ -79,12 +103,12 @@ const WatchList = () => {
                     src={`https://image.tmdb.org/t/p/w500${list.media_data?.poster_path}`}
                     alt={list.media_data?.title || list.media_data?.name}
                     className='h-50 object-cover cursor-pointer'
-                    onClick={() => {loadMovieInNewTab(list.media_id)}}
+                    onClick={() => { loadMovieInNewTab(list.media_id) }}
                   />
 
                   <div className='h-full w-full flex flex-col gap-2 text-left px-3 py-4'>
                     <a href={`http://localhost:${process.env.NEXT_PUBLIC_PORT}/${list.media_type}/${list.media_id}`} target='_blank'>
-                      <h2 className=''>{index + 1}. {list.media_data?.title || list.media_data?.name}</h2>
+                      <h2 className='text-2xl font-semibold'>{index + 1}. {list.media_data?.title || list.media_data?.name}</h2>
                     </a>
                     <div className='w-full flex flex-wrap gap-2'>
                       {list.media_data.genres?.map((g) => (
@@ -101,7 +125,7 @@ const WatchList = () => {
                         {new Date(list.media_data?.release_date || list.media_data.first_air_date).getFullYear()}
                       </span>
                       <span className='cursor-defualt border-1 text-center p-2 py-1 text-xs rounded-md'>
-                        {/* {formatMinutes(list.media_data.runtime)} */} RUNTIME
+                        {`${list.media_type == 'movie' ? formatMinutes(list.media_data.runtime) : `${list.media_data.number_of_seasons} seasons`}`}
                       </span>
                     </div>
                     <div className='flex items-center w-full text-sm'>
@@ -126,16 +150,15 @@ const WatchList = () => {
                 </div>
               </div>
             );
-          })
-        ) : (
-          <div>No watchlist found!</div>
-        )
+          })}
+        
 
-        }
+        
 
       </div>
 
     </div>
+    </>
   )
 }
 

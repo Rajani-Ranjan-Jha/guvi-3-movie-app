@@ -9,6 +9,7 @@ import { addToWatchList, removeFromWatchList } from '@/app/components/action'
 import { useUserContext } from '@/app/context/contextProvider'
 import { getMediaById, getMediaCredits, getMediaPictures, getMediaReviews, getMediaVideos, getMediaWatchProviders } from '@/app/handlers/movieDetails'
 import Link from 'next/link'
+import Navbar from '@/app/components/Navbar'
 
 
 const MOVIE = () => {
@@ -37,6 +38,7 @@ const MOVIE = () => {
     const loadUserfromContext = () => {
         if (!context || !context.user) {
             console.warn("Didnot get user from the context(movie/page.jsx)!")
+            setUser(null)
             return
         }
         setUser(context.user)
@@ -161,6 +163,10 @@ const MOVIE = () => {
     }
 
     const handleAddRemoveWatchList = async (movieId) => {
+        if (!user || !user.email) {
+            alert("Please login to add to watchlist")
+            return
+        }
         const result = isAlreadyInWatchlist ? await removeFromWatchList(movieId, user.email) : await addToWatchList(movieId, 'movie', user.email)
         if (!result) {
             alert("Failded to add watchlist")
@@ -200,41 +206,42 @@ const MOVIE = () => {
     }, [movieDetails])
 
     useEffect(() => {
-        if (movieReviews && user.username) {
-            const hasUserReview = movieReviews.some(review => review.author === user.username);
+        if (movieReviews && user?.username) {
+            const hasUserReview = movieReviews.some(review => review.author === user?.username);
             setIsFirstReview(!hasUserReview);
         }
-    }, [movieReviews, user.username]);
+    }, [movieReviews, user]);
 
     const renderReviews = useCallback((review, index) => {
         return (
             <div key={review.id || index} className='w-50 flex-shrink-0 flex-col items-start bg-white/10 border border-white/50 rounded-lg p-4 hover:bg-white/20 transition-colors duration-200 cursor-default'>
                 <div className='flex items-center mb-2 space-x-2'>
                     <StarIcon size={15} className="text-yellow-400 fill-current" />
-                    <span className='text-sm font-medium '>{review.rating} {`${review.author} ${review.author == user.username ? '(you)' : ''}`}</span>
+                    <span className='text-sm font-medium '>{review.rating} {`${review.author} ${review.author == user?.username ? '(you)' : ''}`}</span>
                 </div>
                 <p className='clamp-3 text-xs  max-w-full'>{`${review.content.length > 150 ? review.content.substring(0, 150) + '...' : review.content}`}</p>
             </div>
         );
-    }, [user.username]);
+    }, [user]);
+
+
 
     if (loading) {
         return (
-            <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                <p className="text-gray-300">Loading movie...</p>
-                
-            </div>
-
+            <>
+                <Navbar />
+                <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                    <p className="text-gray-300">Loading movie...</p>
+                </div>
+            </>
         )
     }
 
-
-
     return (
         <>
+            <Navbar />
             {movieDetails && (
-
                 <div className='relative w-full h-full bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black flex py-10 text-white transition-colors duration-500'>
                     <div className='w-full lg:w-4/5 p-5 gap-5 flex flex-col  mx-auto'>
                         <div className='p-5'>
@@ -264,7 +271,7 @@ const MOVIE = () => {
                                     {formatMinutes(movieDetails.runtime)}
                                 </span>
                                 <span className='flex items-center gap-1 bg-white dark:bg-white/20 text-purple-700 dark:text-white font-semibold cursor-default text-center p-2 py-1 text-xs rounded-md'>
-                                    <Star size={15} className='text-yellow-400 fill-current'/>
+                                    <Star size={15} className='text-yellow-400 fill-current' />
                                     <span>{movieDetails.vote_average.toFixed(1)}</span>
                                 </span>
                             </div>
@@ -301,10 +308,10 @@ const MOVIE = () => {
 
                             {/* more photo-video div */}
                             <div className='w-15/100 h-full flex flex-col justify-center items-center bg-white/10 rounded-r-2xl'>
-                                <a href={`https://www.themoviedb.org/movie/${movieDetails.id}/videos`} target='_blank'  className='w-full h-1/2 p-5 text-md hover:bg-white/20 cursor-pointer rounded-tr-2xl  flex flex-col justify-center items-center gap-5'>
+                                <a href={`https://www.themoviedb.org/movie/${movieDetails.id}/videos`} target='_blank' className='w-full h-1/2 p-5 text-md hover:bg-white/20 cursor-pointer rounded-tr-2xl  flex flex-col justify-center items-center gap-5'>
                                     <ListVideo />
                                     <span >{`${movieVideos.length > 99 ? "99+" : movieVideos.length}`} Videos</span>
-                                    
+
                                 </a>
                                 <a href={`https://www.themoviedb.org/movie/${movieDetails.id}/images/backdrops`} target='_blank' className='w-full h-1/2 p-5 text-md hover:bg-white/20 cursor-pointer rounded-br-2xl  flex flex-col justify-center items-center gap-5'>
                                     <ImagesIcon />
@@ -442,7 +449,13 @@ const MOVIE = () => {
 
                                     </div>
                                     <button className='flex items-center text-sm bg-white/10 px-2 py-1 rounded-md hover:bg-white/20 cursor-pointer'
-                                        onClick={() => setreviewBtn(true)}>
+                                        onClick={() => {
+                                            if (!user) {
+                                                alert("Please login to add review")
+                                                return
+                                            }
+                                            setreviewBtn(true)
+                                        }}>
                                         <Plus className='text-sm mr-1' size={15} /> {`${isFirstReview ? 'review' : 'update'}`}
                                     </button>
                                 </div>

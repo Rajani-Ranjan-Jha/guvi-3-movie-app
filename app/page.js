@@ -1,15 +1,16 @@
 import Image from "next/image";
-import Movie from "./components/Movie";
-import TrendingThisWeek from "./components/TrendingThisWeek";
-import CreateNewReview from "./components/CreateNewReview";
+import ContentLoader from "./components/ContentLoader";
+import Navbar from "./components/Navbar";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black space-y-10 pt-10">
-      <Movie mediaCategory={'anime'} mediaType={'movie'}/>
-      <Movie mediaCategory={'popular'} mediaType="tv" />
-      <Movie mediaCategory={'top_rated'} mediaType="movie"/>
-
-    </div>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black space-y-10 pt-10 transition-colors duration-500">
+        <ContentLoader mediaCategory={"anime"} mediaType={"movie"} />
+        <ContentLoader mediaCategory={"popular"} mediaType="tv" />
+        <ContentLoader mediaCategory={"top_rated"} mediaType="movie" />
+      </div>
+    </>
   );
 }

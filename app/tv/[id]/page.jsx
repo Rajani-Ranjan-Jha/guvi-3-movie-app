@@ -8,6 +8,7 @@ import CreateNewReview from '@/app/components/CreateNewReview'
 import { addToWatchList, removeFromWatchList } from '@/app/components/action'
 import { useUserContext } from '@/app/context/contextProvider'
 import { getMediaById, getMediaCredits, getMediaPictures, getMediaReviews, getMediaVideos, getMediaWatchProviders } from '@/app/handlers/movieDetails'
+import Navbar from '@/app/components/Navbar'
 
 const TV = () => {
 
@@ -36,6 +37,7 @@ const TV = () => {
     const loadUserfromContext = () => {
         if (!context || !context.user) {
             console.warn("Didnot get user from the context(tv/page.jsx)!")
+            setUser(null)
             return
         }
         setUser(context.user)
@@ -158,13 +160,12 @@ const TV = () => {
             console.error(error)
             setLoadingReviews(false)
         }
-        
+
     }
 
     const handleAddRemoveWatchList = async (tvId) => {
-        if(!user){
+        if (!user || !user.email) {
             alert("Please login to add to watchlist")
-            router.push('/login')
             return
         }
         const result = isAlreadyInWatchlist ? await removeFromWatchList(tvId, user.email) : await addToWatchList(tvId, 'tv', user.email)
@@ -205,11 +206,11 @@ const TV = () => {
     }, [tvDetails])
 
     useEffect(() => {//lorem
-        if (tvReviews && user.username) {
-            const hasUserReview = tvReviews.some(review => review.author === user.username);
+        if (tvReviews && user?.username) {
+            const hasUserReview = tvReviews.some(review => review.author === user?.username);
             setIsFirstReview(!hasUserReview);
         }
-    }, [tvReviews, user.username]);
+    }, [tvReviews, user]);
 
 
 
@@ -219,19 +220,22 @@ const TV = () => {
             <div key={review.id || index} className='w-50 flex-shrink-0 flex-col items-start bg-white/10 border border-white/50 rounded-lg p-4 hover:bg-white/20 transition-colors duration-200 cursor-default'>
                 <div className='flex items-center mb-2 space-x-2'>
                     <StarIcon size={15} className="text-yellow-400 fill-current" />
-                    <span className='text-sm font-medium '>{review.rating} {`${review.author} ${review.author == user.username ? '(you)' : ''}`}</span>
+                    <span className='text-sm font-medium '>{review.rating} {`${review.author} ${review.author == user?.username ? '(you)' : ''}`}</span>
                 </div>
                 <p className='clamp-3 text-xs  max-w-full'>{`${review.content.length > 150 ? review.content.substring(0, 150) + '...' : review.content}`}</p>
             </div>
         );
-    }, [user.username]);
+    }, [user]);
 
     if (loading) {
         return (
-            <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                <p className="text-gray-300">Loading series...</p>
-            </div>
+            <>
+                <Navbar />
+                <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                    <p className="text-gray-300">Loading series...</p>
+                </div>
+            </>
 
         )
     }
@@ -240,6 +244,7 @@ const TV = () => {
 
     return (
         <>
+            <Navbar />
             {tvDetails && (
                 <div className='relative w-full h-full bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black flex py-10 text-white transition-colors duration-500'>
                     <div className='w-full lg:w-4/5 p-5 gap-5 flex flex-col mx-auto'>
@@ -444,7 +449,13 @@ const TV = () => {
                                         )}
                                     </div>
                                     <button className='flex items-center text-sm bg-white/10 px-2 py-1 rounded-md hover:bg-white/20 cursor-pointer'
-                                        onClick={() => setreviewBtn(true)}>
+                                        onClick={() => {
+                                            if (!user) {
+                                                alert("Please login to add review")
+                                                return
+                                            }
+                                            setreviewBtn(true)
+                                        }}>
                                         <Plus className='text-sm mr-1' size={15} /> {`${isFirstReview ? 'review' : 'update'}`}
                                     </button>
                                 </div>
