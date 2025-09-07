@@ -158,6 +158,7 @@ const TV = () => {
             console.error(error)
             setLoadingReviews(false)
         }
+        
     }
 
     const handleAddRemoveWatchList = async (tvId) => {

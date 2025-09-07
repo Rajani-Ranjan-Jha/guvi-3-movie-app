@@ -223,6 +223,7 @@ const MOVIE = () => {
             <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
                 <p className="text-gray-300">Loading movie...</p>
+                
             </div>
 
         )
