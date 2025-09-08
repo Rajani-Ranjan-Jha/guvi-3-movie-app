@@ -3,18 +3,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Play, Star, BookmarkPlus, BookmarkCheck, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { addToWatchList, getTrailerLink, removeFromWatchList } from './action';
 import { useUserContext } from '../context/contextProvider';
-import { getMediaByCategory } from '../handlers/movieDetails';
+import { getMediaByCategory } from '../handlers/mediaHandler';
 import Link from 'next/link';
-import Navbar from './Navbar';
+import { getTrailerLink, removeFromWatchList } from '../handlers/watchlistHandler';
+
 
 
 const ContentLoader = ({
-    listLength = 10,
     mediaCategory = 'popular',
     mediaType = 'tv',
-    title = `${mediaCategory} in ${mediaType}`,
+    mediaTitle = `${mediaCategory} in ${mediaType}`,
 }) => {
 
 
@@ -44,6 +43,25 @@ const ContentLoader = ({
             setUserWatchlist(IdList)
         }
     }
+
+    // to update user and watchlist when context changes
+    useEffect(() => {
+        if (context.user) {
+            // console.warn("have user");
+            setUser(context.user);
+            if (context.watchlist) {
+                let IdList = [];
+                context.watchlist.forEach((list) => IdList.push(Number(list.media_id)));
+                setUserWatchlist(IdList);
+            } else {
+                setUserWatchlist([]);
+            }
+        } else {
+            // console.warn("No user");
+            setUser(null);
+            setUserWatchlist([]);
+        }
+    }, [context.user, context.watchlist]);
 
 
     const loadByCategory = async () => {
@@ -111,7 +129,7 @@ const ContentLoader = ({
     }
 
     useEffect(() => {
-        loadUserfromContext()
+        // loadUserfromContext()
         loadByCategory()
         checkScrollPosition();
         const container = scrollContainerRef.current;
@@ -134,13 +152,12 @@ const ContentLoader = ({
     if (Movies && Movies.length != 0) {
         return (
             <>
-            {/* <Navbar /> */}
             <div className="p-6 px-10 text-white">
                 <div className="w-full mx-auto">
                     {/* Category Title */}
                     <div className="flex items-center mb-6">
                         <div className="w-1 h-8 bg-white dark:bg-purple-600 mr-3"></div>
-                        <h2 className="text-2xl font-bold">{title || 'No title'}</h2>
+                        <h2 className="text-2xl font-bold">{mediaTitle || 'No title'}</h2>
                     </div>
 
                     {/* Movie Carousel Container */}
@@ -149,7 +166,7 @@ const ContentLoader = ({
                         {showLeftArrow && (
                             <button
                                 onClick={() => scroll('left')}
-                                className={`absolute left-0 top-1/2 transform -translate-y-1/2 z-10  bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                className={`hidden md:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10  bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                             >
                                 <ChevronLeft size={24} />
                             </button>
@@ -159,7 +176,7 @@ const ContentLoader = ({
                         {showRightArrow && (
                             <button
                                 onClick={() => scroll('right')}
-                                className={`absolute right-0 top-1/2 transform -translate-y-1/2 z-10   bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                className={`hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10   bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                             >
                                 <ChevronRight size={24} />
                             </button>
@@ -169,7 +186,6 @@ const ContentLoader = ({
                         <div
                             ref={scrollContainerRef}
                             className="flex overflow-x-auto scrollbar-hide scroll-smooth"
-                        // style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                         >
                             {Movies.map((movie, index) => (
                                 <div
@@ -208,7 +224,6 @@ const ContentLoader = ({
 
                                     {/* Movie Info */}
                                     <div className="h-50 px-4 py-2 flex flex-col">
-                                        {/* Rating and Title - takes available space */}
                                         <div className="flex flex-col flex-1">
                                             <div className="flex items-center mb-2">
                                                 <Star size={16} className="text-yellow-400 fill-current mr-1" />
@@ -224,19 +239,19 @@ const ContentLoader = ({
                                             </div>
                                         </div>
 
-                                        {/* Action Buttons - always at bottom */}
+                                        {/* Action Buttons */}
                                         <div className="space-y-2 mt-auto">
                                             <button className="w-full hover:bg-purple-400/40  py-2 px-4 rounded-full font-semibold transition-colors duration-200 cursor-pointer"
                                                 onClick={() => handleWatchList(movie.id)}>
                                                 {userWatchlist && userWatchlist.includes(movie.id) ? (
                                                     <div className='flex justify-center items-center gap-2'>
-                                                        <span><Check size={20} className="text-white fill-current" /></span>
+                                                        <span><Check size={20} className="text-white" /></span>
                                                         <span>Watchlist</span>
                                                     </div>
 
                                                 ) : (
                                                     <div className='flex justify-center items-center gap-2'>
-                                                        <span><Plus size={20} className="text-white fill-current" /></span>
+                                                        <span><Plus size={20} className="text-white" /></span>
                                                         <span>Watchlist</span>
                                                     </div>
 
@@ -249,10 +264,6 @@ const ContentLoader = ({
                                                 <Play size={14} className='fill-current' />
                                                 Trailer
                                             </button>
-
-                                            {/* <button className="w-full bg-gray-700 hover:bg-gray-600  py-2 px-4 rounded text-sm font-medium transition-colors duration-200">
-                                                Watch options
-                                            </button> */}
                                         </div>
                                     </div>
                                 </div>

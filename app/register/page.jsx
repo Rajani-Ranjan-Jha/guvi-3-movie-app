@@ -1,9 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import { EyeClosedIcon, EyeIcon } from 'lucide-react';
-
 
 const Register = () => {
     const [username, setUsername] = useState('');
@@ -14,8 +13,11 @@ const Register = () => {
     const [EyeBtn, setEyeBtn] = useState(true);
     const [loading, setLoading] = useState(false);
     
-
     const router = useRouter()
+
+    useEffect(() => {
+        document.title = 'Register - Movie Master'
+    }, [])
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -23,10 +25,12 @@ const Register = () => {
 
         if (!username || !email || !password || !confirmPassword) {
             alert("All fields are required");
+            setLoading(false);
             return;
         }
         if (password !== confirmPassword) {
             alert("Password and confirm password should be same");
+            setLoading(false);
             return;
         }
 

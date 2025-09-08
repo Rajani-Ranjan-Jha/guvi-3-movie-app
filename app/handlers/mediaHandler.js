@@ -1,31 +1,56 @@
 const TMDB_TOKEN = process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN;
 
-export async function getMediaByCategory(mediaCategory, mediaType) {
-  let url =
-    `https://api.themoviedb.org/3/${mediaType}/${mediaCategory}?language=en-US&page=1`;
+export async function searchMediaByQuery(query) {
+  const url = `https://api.themoviedb.org/3/search/multi?query=${query}&language=en-US&page=1`;
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization:
-        `Bearer ${TMDB_TOKEN}`,
+      Authorization: `Bearer ${TMDB_TOKEN}`,
+    },
+  };
+
+  try {
+    const res = await fetch(url, options);
+    const data = await res.json();
+    const media_outputs_only = data.results.filter(
+      (r) => r.media_type == "tv" || r.media_type == "movie"
+    );
+    const sorted_results = media_outputs_only.sort(
+      (a, b) => b.popularity - a.popularity
+    );
+    return sorted_results;
+    // console.log(data)
+  } catch (error) {
+    console.warn(error);
+    return null;
+  }
+}
+
+export async function getMediaByCategory(mediaCategory, mediaType) {
+  let url = `https://api.themoviedb.org/3/${mediaType}/${mediaCategory}?language=en-US&page=1`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${TMDB_TOKEN}`,
     },
   };
 
   switch (mediaCategory) {
-    case 'trending_day':
+    case "trending_day":
       url = `https://api.themoviedb.org/3/trending/${mediaType}/day?language=en-US`;
       break;
-    case 'trending_week':
+    case "trending_week":
       url = `https://api.themoviedb.org/3/trending/${mediaType}/week?language=en-US`;
       break;
-    case 'top_grossing':
+    case "top_grossing":
       url = `https://api.themoviedb.org/3/discover/${mediaType}?sort_by=revenue.desc?language=en-US&page=1`;
       break;
-    case 'anime':
+    case "anime":
       url = `https://api.themoviedb.org/3/discover/${mediaType}?with_genres=16?language=en-US&page=1`;
       break;
-  
+
     default:
       break;
   }
@@ -132,7 +157,7 @@ export async function getMediaCredits(mediaId, mediaType) {
     });
 
     // console.log({ casts, directors, writers });
-    console.log(data);
+    // console.log(data);
     return { casts, directors, writers };
     // return data
   } catch (error) {
@@ -152,7 +177,7 @@ export async function getMediaWatchProviders(mediaId, mediaType) {
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-    console.log("OTT (action.js):", data.results);
+    // console.log("OTT (action.js):", data.results);
 
     return data.results;
   } catch (error) {
@@ -174,7 +199,7 @@ export async function getMediaReviews(mediaId, mediaType) {
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-    console.log("Reviews (action.js):", data.results);
+    // console.log("Reviews:", data.results);
     return data.results;
   } catch (error) {
     console.error(error);

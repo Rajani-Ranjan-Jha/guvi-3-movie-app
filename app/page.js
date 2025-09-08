@@ -1,6 +1,11 @@
 import Image from "next/image";
 import ContentLoader from "./components/ContentLoader";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+
+export const metadata = {
+  title: 'Home - Movie Master'
+};
 
 export default function Home() {
   return (
@@ -11,6 +16,7 @@ export default function Home() {
         <ContentLoader mediaCategory={"popular"} mediaType="tv" />
         <ContentLoader mediaCategory={"top_rated"} mediaType="movie" />
       </div>
+      <Footer/>
     </>
   );
 }

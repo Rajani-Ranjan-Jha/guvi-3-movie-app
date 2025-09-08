@@ -5,7 +5,6 @@ import { signIn } from "next-auth/react";
 import React, { useState, useEffect } from 'react';
 import { EyeClosedIcon, EyeIcon } from 'lucide-react';
 
-
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,7 +15,7 @@ const Login = () => {
     const router = useRouter();
 
     useEffect(() => {
-
+        document.title = 'Login - Movie Master'
         const checkAuth = async () => {
             const response = await fetch('/api/auth/session');
             const data = await response.json();

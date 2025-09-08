@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 
 
@@ -21,8 +21,6 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
-
     // Update user state when session changes
     useEffect(() => {
         if (status === 'loading') {
@@ -32,6 +30,7 @@ export const ContextProvider = ({ children }) => {
 
         if (session?.user) {
             setUser(session.user);
+            // console.warn("user:", session.user)
             setError(null);
             setLoading(true);
 
@@ -46,12 +45,14 @@ export const ContextProvider = ({ children }) => {
                     });
                     const res = await req.json()
                     if (res.status != 201) {
-                        console.warn("context:", res.message)
+                        // console.warn("context:", res.message)
                     }
                     setWatchlist(res.watchList)
                     setLoading(false);
                 } catch (error) {
                     console.error("Error loading watchlist:", error);
+                    setError(error.message);
+                    setLoading(false);
                 }
             };
             loadWatchlist();
@@ -62,13 +63,11 @@ export const ContextProvider = ({ children }) => {
         }
     }, [session, status]);
 
-    if (loading) {
-        // Optionally, you can return a loading indicator here or null to prevent rendering children until user is loaded
-        return null;
-    }
+    // Memoize the context value to prevent unnecessary re-renders
+    const value = useMemo(() => ({ user, watchlist, loading, error }), [user, watchlist, loading, error]);
 
     return (
-        <UserContext.Provider value={{ user, watchlist, loading, error }}>
+        <UserContext.Provider value={value}>
             {children}
         </UserContext.Provider>
     );

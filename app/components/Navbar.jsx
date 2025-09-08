@@ -1,62 +1,60 @@
 'use client'
-import React, { useContext, useEffect, useState, useRef } from 'react'
-import { ChevronUp, ChevronDown } from 'lucide-react'
+import React, {useEffect, useState, useRef } from 'react'
+import { ChevronUp, ChevronDown, X, XIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 
 import { useUserContext } from '../context/contextProvider'
-import { handleMovieSearch } from '../handlers/search'
-import ShowSearchResults from './ShowSearchResults'
+import ShowSearchResults from './Search'
+
 
 const Navbar = () => {
   const context = useUserContext()
   const router = useRouter()
   const [user, setUser] = useState()
 
-  const [searchResult, setSearchResult] = useState(null)
-  const searchRef = useRef(null)
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+  const [openSearchbar, setOpenSearchbar] = useState(false);
   const currentSite = usePathname()
 
 
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'light';
-  });
+   // Theme state and logic
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
-    if (!context.user) {
-      console.log('No user logged in')
-      setIsLoggedIn(false)
-      return
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
     }
-
-    setUser(context.user)
-    setIsLoggedIn(true)
-  }, [context.user])
-
-
+  }, []);
 
   useEffect(() => {
-    document.body.className = theme;
-    localStorage.setItem('theme', theme);
+    if (typeof window !== 'undefined') {
+      document.body.className = theme;
+      localStorage.setItem('theme', theme);
+    }
   }, [theme]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setSearchResult(null);
-      }
-    };
+    if (context.user) {
+      // console.warn("have user");
+      setUser(context.user);
+      setIsLoggedIn(true);
+    } else {
+      // console.warn("No user");
+      setUser(null);
+      setIsLoggedIn(false);
+    }
+  }, [context.user]);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+
+
+
+
 
 
   const toggleMenu = () => {
@@ -77,32 +75,22 @@ const Navbar = () => {
   const handleLogOut = async () => {
     try {
       await signOut({ callbackUrl: '/' })
-      // The signOut function will handle clearing the session and redirecting
-      // The context will automatically update since it depends on the session
     } catch (error) {
       console.error('Logout error:', error)
     }
   }
 
-  const searchMovie = async (input) => {
-    const result = await handleMovieSearch(input)
-    if (!result) {
-      return
-    }
-    // console.warn(result)
-    setSearchResult(result)
 
-  }
 
   return (
-<nav className={` w-full px-4 py-1 bg-purple-700 dark:bg-black text-white dark:text-white transition-all duration-500 border-b-1`}>
+    <nav className={` w-full px-4 py-1 bg-purple-700 dark:bg-black text-white dark:text-white transition-all duration-500 border-b-1`}>
       <div className='flex items-center justify-between '>
         <div className='font-semibold text-3xl py-3'>
           <Link href={'/'}>Movie Master</Link>
         </div>
 
 
-        <div className='block md:hidden transition-all duration-300 ease-in-out'>
+        <div className='block lg:hidden transition-all duration-300 ease-in-out'>
           <button onClick={toggleMenu} aria-label="Toggle menu" className="focus:outline-none transition-all duration-300 ease-in-out">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               {isOpen ? (
@@ -114,25 +102,21 @@ const Navbar = () => {
           </button>
         </div>
 
-        <div ref={searchRef} className=' relative lg:w-100 hidden md:flex flex-col'>
-          <input type="text" placeholder='search something...' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto'
-            onChange={(e) => { searchMovie(e.target.value) }} />
-          {searchResult && searchResult.length != 0 && (
-            <ShowSearchResults result={searchResult} />
-          )}
+        <div className='relative lg:w-100 hidden lg:flex flex-col'>
+          <input type="text" placeholder='search something...' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto cursor-pointer'
+            onClick={() => { setOpenSearchbar(true) }} />
         </div>
 
-        <div id='nav-holder' className={`md:flex-row md:flex md:items-center md:gap-2 absolute md:static md:bg-transparent  w-full md:w-auto left-0 md:left-auto top-14 md:top-auto transition-all duration-300 ease-in-out ${isOpen ? 'flex flex-col items-center z-10 bg-purple-600 dark:bg-black' : 'hidden'} border-0`}>
+        <div id='nav-holder' className={`w-full lg:w-auto absolute lg:static lg:flex-row lg:flex lg:items-center lg:gap-0 blur-1 lg:bg-transparent left-0 lg:left-auto top-17 lg:top-auto transition-all duration-200 ease-in-out ${isOpen ? 'flex flex-col items-center z-50 bg-purple-600 dark:bg-black' : 'hidden'} border-b-1 lg:border-0`}>
 
-          <div ref={searchRef} className=' relative w-100 md:hidden flex flex-col'>
-            <input type="text" placeholder='search something...' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto'
-              onChange={(e) => { searchMovie(e.target.value) }} />
-            {searchResult && searchResult.length != 0 && (
-              <ShowSearchResults result={searchResult} />
-            )}
+          <div  className=' relative w-100 lg:hidden flex flex-col'>
+            <input type="text" placeholder='search something...' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto cursor-pointer'
+              onClick={() => { 
+                setIsOpen(false)
+                setOpenSearchbar(true) }} />
           </div>
-          <Link onClick={toggleMenu} href="/" className='block px-2 mx-auto py-3 rounded-lg font-semibold cursor-pointer hover:bg-white/20 md:inline-block'>Home</Link>
-          <Link onClick={toggleMenu} href="/about" className='block px-2 mx-auto py-3 rounded-lg font-semibold cursor-pointer hover:bg-white/20 md:inline-block'>About</Link>
+          <Link onClick={toggleMenu} href="/" className='block lg:inline-block px-2 mx-auto py-3 rounded-lg font-semibold cursor-pointer hover:bg-white/20 '>Home</Link>
+          <Link onClick={toggleMenu} href="/about" className='block lg:inline-block px-2 mx-auto py-3 rounded-lg font-semibold cursor-pointer hover:bg-white/20 '>About</Link>
 
 
           {theme === 'dark' ? (
@@ -159,7 +143,7 @@ const Navbar = () => {
                 <span className=''>{user?.username || user?.name || 'NULL'}</span>
                 <span className=''>{isDropDownOpen ? <ChevronUp /> : <ChevronDown />}</span>
               </button>
-              <ul id='dropdown-content' className={`w-full absolute border-1 border-t-0 font-semibold bg-purple-600 dark:bg-black z-20 rounded-b-lg py-2 px-1 space-y-1 top-12 ${isDropDownOpen ? "block" : "hidden"}`}>
+              <ul id='dropdown-content' className={`w-full absolute border-1 border-t-0 font-semibold bg-white/20 lg:bg-purple-600 lg:dark:bg-black z-20 rounded-b-lg py-2 px-1 space-y-1 top-12 ${isDropDownOpen ? "block" : "hidden"}`}>
                 {(currentSite !== '/watchlist' &&
                   <li className='flex'>
                     <Link onClick={toggleDropDown} href={'/watchlist'} className='w-full px-4 py-2 rounded-lg hover:bg-white/20 text-white text-center cursor-pointer'>Watchlist</Link>
@@ -172,19 +156,35 @@ const Navbar = () => {
             </div>
 
           ) : (
-            <div className={`min-w-36 flex ${isOpen ? 'flex-col gap-0':'flex-row'} justify-center items-center gap-2 relative rounded-2xl`}>
+            <div className={`min-w-36 flex ${isOpen ? 'flex-col gap-2' : 'flex-row'} justify-center items-center gap-0 relative rounded-2xl`}>
               <button className='cursor-pointer flex justify-around'>
-                <Link href="/register" className='w-full px-4 py-3 rounded-lg font-semibold hover:bg-white/20 text-center cursor-pointer '>Register</Link>
+                <Link href="/register" className='w-full lg:mr-1 px-4 py-3 rounded-lg font-semibold hover:bg-white/20 text-center cursor-pointer '>Register</Link>
               </button>
               <button className='cursor-pointer flex justify-around'>
                 <Link href="/login" className='w-full px-4 py-3 rounded-lg font-semibold bg-white text-purple-600 dark:text-black hover:bg-white/80 text-center cursor-pointer '>Login</Link>
               </button>
-
             </div>
 
           )}
 
         </div>
+
+{/* searchbar component */}
+        {openSearchbar && (
+          <div className="fixed w-screen h-screen inset-0 bg-black/70 bg-opacity-50 flex justify-center lg:items-center z-20" onClick={() => setOpenSearchbar(false)}>
+            <div className='w-full lg:w-200 h-100 mx-auto border-1 blur-1 rounded-lg'
+              onClick={(e) => e.stopPropagation()}>
+              <div className='w-full flex justify-end'>
+                <button className='px-2 py-2 rounded-md cursor-pointer hover:bg-white/20' onClick={() => setOpenSearchbar(false)}>
+                <XIcon size={20} />
+                </button>
+              </div>
+              <ShowSearchResults />
+
+            </div>
+
+          </div>
+        )}
       </div>
     </nav>
   )

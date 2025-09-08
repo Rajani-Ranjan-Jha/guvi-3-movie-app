@@ -5,9 +5,9 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { formatMinutes, formatCurrency, formatNumber } from '@/utils/formatter'
 import CreateNewReview from '@/app/components/CreateNewReview'
-import { addToWatchList, removeFromWatchList } from '@/app/components/action'
+import { addToWatchList, removeFromWatchList } from '@/app/handlers/watchlistHandler'
 import { useUserContext } from '@/app/context/contextProvider'
-import { getMediaById, getMediaCredits, getMediaPictures, getMediaReviews, getMediaVideos, getMediaWatchProviders } from '@/app/handlers/movieDetails'
+import { getMediaById, getMediaCredits, getMediaPictures, getMediaReviews, getMediaVideos, getMediaWatchProviders } from '@/app/handlers/mediaHandler'
 import Navbar from '@/app/components/Navbar'
 
 const TV = () => {
@@ -43,9 +43,23 @@ const TV = () => {
         setUser(context.user)
         // console.warn(context)
         const watchlist = context.watchlist
-        // console.log(watchlist, id)
         watchlist.find((list) => list.media_id == id) ? setIsAlreadyInWatchlist(true) : setIsAlreadyInWatchlist(false)
     }
+
+    useEffect(() => {
+        if (context.user) {
+            // console.warn("have user");
+            setUser(context.user);
+            if (context.watchlist) {
+                const watchlist = context.watchlist
+                watchlist.find((list) => list.media_id == id) ? setIsAlreadyInWatchlist(true) : setIsAlreadyInWatchlist(false)
+            }
+        } else {
+            console.warn("No user");
+            setUser(null);
+            setIsAlreadyInWatchlist(false);
+        }
+    }, [context.user, context.watchlist]);
 
     const loadTvDetails = async (tvId) => {
         setloading(true)
@@ -83,23 +97,8 @@ const TV = () => {
 
     }
 
-    const loadTvWatchProviders = async (tvId) => {
-        const output = await getMediaWatchProviders(tvId, 'tv')
-        //console.log(output)
-        // setTvProvidors(output)
 
-
-    }
-
-    const loadTvReviews = async (tvId) => {
-        const output = await getMediaReviews(tvId, 'tv')
-        //console.log(output)
-        setTvReviews(output)
-
-    }
-
-    //lorem
-    const addMovieInfoToDB = async (tvId) => {
+    const addTvInfoToDB = async (tvId) => {
         try {
             const reviews = await getMediaReviews(tvId, 'tv');
             if (!reviews || reviews.length === 0) {
@@ -124,15 +123,15 @@ const TV = () => {
                 console.warn(`${res.message}, status: ${res.status}`)
                 return false;
             }
-            console.warn("Added to the local db(addMovieInfoToDB):", reviews)
-            return await loadMovieReviewsFromDB(tvId)
+            console.warn("Added to the local db:")
+            return true
         } catch (error) {
             console.error(error)
             return null;
         }
     }
 
-    const loadMovieReviewsFromDB = async (tvId) => {
+    const loadTvReviewsFromDB = async (tvId) => {
         setLoadingReviews(true)
         try {
 
@@ -146,14 +145,17 @@ const TV = () => {
             const res = await req.json()
             if (res.status != 200) {
                 console.warn(res.message, ", setting again!")
-                const added = await addMovieInfoToDB(tvId)
+                const added = await addTvInfoToDB(tvId)
                 if (!added) {
                     setLoadingReviews(false)
+                    return
+                } else {
+                    await loadTvReviewsFromDB(tvId)
                     return
                 }
                 // return;
             }
-            console.warn("got the reviews", res.reviews)
+            console.warn("got the reviews")
             setTvReviews(res.reviews)
             setLoadingReviews(false)
         } catch (error) {
@@ -173,7 +175,6 @@ const TV = () => {
             alert("Failded to add watchlist")
             return
         }
-        // alert('ADDED TO WATCHLIST!')
         setIsAlreadyInWatchlist(!isAlreadyInWatchlist)
     }
 
@@ -182,30 +183,26 @@ const TV = () => {
 
     useEffect(() => {
         if (id) {
-            loadUserfromContext()
             loadTvDetails(id)
             loadTvVideos(id)
             loadTvPictures(id)
             loadTvCredits(id)
-            loadTvWatchProviders(id)
-            // loadTvReviews(id)
         }
     }, [])
 
-    useEffect(() => {//lorem
-        console.log(tvDetails)
+    useEffect(() => {
         if (!tvDetails || tvDetails.length === 0) {
             // console.warn("dont have movie details right now")
             return
         }
+        document.title = `${tvDetails.name} - Movie Master`
         setTvProvidors(tvDetails.networks)
-
-        loadMovieReviewsFromDB(id)
+        loadTvReviewsFromDB(id)
 
 
     }, [tvDetails])
 
-    useEffect(() => {//lorem
+    useEffect(() => {
         if (tvReviews && user?.username) {
             const hasUserReview = tvReviews.some(review => review.author === user?.username);
             setIsFirstReview(!hasUserReview);
@@ -251,18 +248,12 @@ const TV = () => {
                         <div className='p-5'>
                             <div className='w-full flex justify-between items-center'>
                                 <h2 className=' text-5xl'>{tvDetails.name}</h2>
-                                <button id='watchlist-btn' className='flex items-center gap-1 px-2 py-2 hover:bg-white/20 cursor-pointer text-sm rounded-lg'
+                                <button className='flex items-center gap-1 px-2 py-2 hover:bg-white/20 cursor-pointer text-sm rounded-lg'
                                     onClick={() => { handleAddRemoveWatchList(tvDetails.id) }}>
                                     {isAlreadyInWatchlist ? (
-                                        <>
-                                            <span><BookmarkCheck /></span>
-                                            {/* <span>Remove from Watchlist</span> */}
-                                        </>
+                                        <span><BookmarkCheck /></span>
                                     ) : (
-                                        <>
-                                            <span><BookmarkPlus /></span>
-                                            {/* <span>Add to Watchlist</span> */}
-                                        </>
+                                        <span><BookmarkPlus /></span>
                                     )}
 
                                 </button>
@@ -282,23 +273,23 @@ const TV = () => {
                         </div>
 
                         {/* media div */}
-                        <div className='w-full p-5 rounded-2xl flex justify-center items-center'>
+                        <div className='w-full p-5 rounded-2xl flex flex-col gap-5 md:gap-0 md:flex-row justify-center items-center'>
 
                             {/* image div */}
-                            <div className='w-1/4 h-full  rounded-l-2xl'>
+                            <div className='w-full mx-auto md:w-1/4 md:h-full rounded-md md:rounded-l-2xl'>
                                 <img
                                     src={`https://image.tmdb.org/t/p/w500${tvDetails?.poster_path}`}
                                     alt={tvDetails?.name}
-                                    className="w-full object-cover rounded-l-2xl"
+                                    className="w-full object-cover rounded-md md:rounded-l-2xl"
                                 />
                             </div>
 
                             {/* trailer div */}
-                            <div className='w-6/10 h-full mx-0.5'>
+                            <div className='w-full md:w-6/10 h-50 md:h-full mx-0.5'>
                                 {tvTrailer.length > 0 && (
                                     <div className='w-full h-full'>
                                         <iframe
-                                            className='w-full h-full'
+                                            className='w-full h-full rounded-md md:rounded-none'
 
                                             src={`https://www.youtube.com/embed/${tvTrailer[0].key}?autoplay=0&mute=1`}
 
@@ -312,15 +303,15 @@ const TV = () => {
                             </div>
 
                             {/* more photo-video div */}
-                            <div className='w-15/100 h-full flex flex-col justify-center items-center bg-white/10 rounded-r-2xl'>
-                                <a href={`https://www.themoviedb.org/tv/${tvDetails.id}/videos`} target='_blank' className='w-full h-1/2 p-5 text-md hover:bg-white/20 cursor-pointer rounded-tr-2xl  flex flex-col justify-center items-center gap-5'>
+                            <div className='w-full md:w-15/100 h-50 md:h-full flex flex-col justify-center items-center bg-white/10 rounded-md md:rounded-r-2xl'>
+                                <a href={`https://www.themoviedb.org/tv/${tvDetails.id}/videos`} target='_blank' className='w-full h-1/2 p-5 text-md hover:bg-white/20 cursor-pointer rounded-md md:rounded-tr-2xl  flex flex-col justify-center items-center gap-5'>
                                     <ListVideo />
-                                    <span >{`${tvVideos.length > 99 ? "99+" : tvVideos.length}`} Videos</span>
+                                    <span className='text-center'>{`${tvVideos.length > 99 ? "99+" : tvVideos.length}`} Videos</span>
 
                                 </a>
-                                <a href={`https://www.themoviedb.org/tv/${tvDetails.id}/images/backdrops`} target='_blank' className='w-full h-1/2 p-5 text-md hover:bg-white/20 cursor-pointer rounded-br-2xl  flex flex-col justify-center items-center gap-5'>
+                                <a href={`https://www.themoviedb.org/tv/${tvDetails.id}/images/backdrops`} target='_blank' className='w-full h-1/2 p-5 text-md hover:bg-white/20 cursor-pointer rounded-md md:rounded-tr-2xl  flex flex-col justify-center items-center gap-5'>
                                     <ImagesIcon />
-                                    <span >{`${tvPictures.length > 99 ? "99+" : tvPictures.length}`} Images</span>
+                                    <span className='text-center'>{`${tvPictures.length > 99 ? "99+" : tvPictures.length}`} Images</span>
                                 </a>
 
                             </div>
@@ -356,15 +347,8 @@ const TV = () => {
                                 </div>
 
                                 {/* writer */}
-                                <div className='space-x-3 border-t-1 border-t-white p-2 py-1 text-sm'>
-                                    Writer: {tvWriters.length > 0 ? (
-                                        tvWriters.map((w, i) =>
-                                        (<span key={w.id}>
-                                            {w.name}
-                                        </span>))
-                                    ) : (
-                                        <span> Not Found</span>
-                                    )}
+                                <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
+                                    Writer: {tvWriters.length > 0 ? tvWriters.map(w => w.name).join(', ') : 'Not Found'}
                                 </div>
 
                                 {tvDetails.status == 'Released' && (
@@ -415,11 +399,11 @@ const TV = () => {
                                     {tvCasts?.length != 0 && (<small>{`(${tvCasts.length} total)`}</small>)}
                                 </div>
 
-                                <div className='w-full mx-auto flex flex-wrap justify-start items-center space-x-2'>
+                                <div className='w-full mx-auto flex flex-col md:flex-row md:flex-wrap justify-start items-center space-x-2'>
 
                                     {tvCasts.slice(0, 20).map((cast, index) =>
                                         <div
-                                            className='w-2/5 my-2 flex justify-start items-center gap-5  hover:bg-white/20 rounded-2xl cursor-default transition-all duration-300'
+                                            className='bg-white/20 md:bg-transparent w-full md:w-2/5 my-2 flex justify-start items-center gap-5  md:hover:bg-white/20 rounded-2xl cursor-default transition-all duration-300'
                                             key={cast.id}
                                         >
                                             {cast.profile_path ? (<img
@@ -444,7 +428,7 @@ const TV = () => {
                                 <div className='flex justify-between items-center'>
                                     <div className='flex items-center border-0 gap-2 font-semibold'>
                                         <h2 className=' text-2xl hover:bg-text-700'>User reviews</h2>
-                                        {tvReviews?.length != 0 && (
+                                        {tvReviews && tvReviews?.length != 0 && (
                                             <small>{`(${tvReviews?.length} total)`}</small>
                                         )}
                                     </div>
@@ -459,29 +443,18 @@ const TV = () => {
                                         <Plus className='text-sm mr-1' size={15} /> {`${isFirstReview ? 'review' : 'update'}`}
                                     </button>
                                 </div>
-                                {/* <div className='flex flex-col justify-center items-start gap-2 text-3xl py-2'>
-                                    <div className='flex items-center gap-2'>
-                                        <StarIcon size={35} className="text-yellow-400 fill-current" />
-                                        <span>
-                                            {`${tvDetails.vote_average.toFixed(2)}`}
-                                        </span>
-                                        <small className='text-xs'>
-                                            {tvDetails.vote_count}
-                                        </small>
-                                    </div>
-                                </div> */}
+
                                 <div className='flex flex-col items-start'>
-                                    {/* <h1 className="text-xl font-semibold mb-2">Featured reviews</h1> */}
                                     <div className='w-full h-52 flex flex-row space-x-4 overflow-x-auto handle-scroll px-2 py-2'>
                                         {tvReviews && tvReviews.length > 0 ? (tvReviews.map((review, index) => {
                                             return renderReviews(review, index)
                                         }))
                                             : ((LoadingReviews ? (
-                                                <p className='mx-auto '>
+                                                <p className='mx-auto text-xl'>
                                                     Loading reviews...
                                                 </p>)
-                                                : (<p className='mx-auto '>
-                                                    No review available
+                                                : (<p className='mx-auto text-xl'>
+                                                    No review available!
                                                 </p>
 
                                                 ))

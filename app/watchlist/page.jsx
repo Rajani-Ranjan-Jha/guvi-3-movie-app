@@ -1,45 +1,22 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { getWatchList, removeFromWatchList } from '../components/action'
+
 import { useUserContext } from '../context/contextProvider'
 import { Star, Trash2 } from 'lucide-react'
 import { formatMinutes, formatNumber } from '@/utils/formatter'
 import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
+import { removeFromWatchList } from '../handlers/watchlistHandler'
 
 const WatchList = () => {
 
   const context = useUserContext()
   const [watchlist, setWatchlist] = useState()
   const [loading, setLoading] = useState(true)
-  const [movieCasts, setMovieCasts] = useState()
-  const [movieDirectors, setMovieDirectors] = useState()
-  const [movieWriters, setMovieWriters] = useState()
+
 
   const router = useRouter()
 
-
-
-
-  const loadWatchListMovies = async (email) => {
-    const result = await getWatchList(email, watchlist, setWatchlist)
-    if (!result) {
-      alert("Unable to get watchlist")
-      return
-    }
-    setLoading(false)
-  }
-
-  // const loadMovieCasts = async (movieId) => {
-  //   const result = await getMovieCasts(movieId)
-  //   if (!result) {
-  //     alert("Unable to get movie casts")
-  //     return
-  //   }
-  //   setMovieCasts(result.casts)
-  //   setMovieDirectors(result.directors)
-  //   setMovieWriters(result.writers)
-  // }
 
   const handleDeleteWatchList = async (mediaId) => {
     const result = await removeFromWatchList(mediaId, context.user.email)
@@ -51,63 +28,57 @@ const WatchList = () => {
     setWatchlist(newList)
   }
 
-  const loadMovieInNewTab = async (movieId) => {
-    window.open(`http://localhost:${process.env.NEXT_PUBLIC_PORT}/movie/${movieId}`, '_blank')
+  const loadMovieInNewTab = async (mediaType, mediaId) => {
+    window.open(`${process.env.NEXT_PUBLIC_URL}/${mediaType}/${mediaId}`, '_blank')
   }
 
   useEffect(() => {
-    if (!context || !context.user) {
-      router.push('/login')
-      return
-    } else{
-      loadWatchListMovies(context.user.email)
-    }
+    document.title = 'Watchlist - Movie Master'
   }, [])
 
-  // useEffect(() => {
-  //   if (watchlist && watchlist.length != 0) {
-  //   }
-  // }, [watchlist])
+  useEffect(() => {
+    if (!context || !context.user) {
+      // router.push('/login')
+      return
+    } else{
+      setWatchlist(context.watchlist)
+      setLoading(false)
+    }
+  }, [context, context.watchlist])
 
-  if (loading) {
+
+  if (loading || !watchlist) {
     return (
-      <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black ">
+      <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
         <p className="text-gray-300">Loading Watchlist...</p>
       </div>
 
     )
   }
-  if (!watchlist || watchlist.length === 0) {
-    return (
-      <div className="w-full h-screen flex flex-col justify-center items-center bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black ">
-        <p className="text-gray-300 text-2xl">No content found!</p>
-      </div>
 
-    )
-  }
 
 
   return (
     <>
     <Navbar/>
-    <div className='w-full h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black text-white flex flex-col transition-colors duration-500'>
+    <div className='w-full min-h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black text-white flex flex-col transition-colors duration-500'>
       <h1 className='mx-auto text-center text-4xl font-semibold py-5'>Your Watchlist</h1>
-      <div className='w-4/5 mx-auto flex flex-col gap-2 justify-start items-start'>
+      <div className='w-full lg:w-4/5 mx-auto flex flex-col gap-2 justify-start items-start pb-10 lg:pb-5'>
           {watchlist.map((list, index) => {
             return (
-              <div className='flex flex-col p-3 rounded-2xl hover:bg-white/10 justify-start h-70 w-full border-1' key={list.media_id}>
+              <div className='flex flex-col gap-4 p-3 rounded-lg hover:bg-white/10 justify-start lg:h-70 w-full border-1' key={list.media_id}>
                 <div className='h-4/5 flex items-start'>
 
                   <img
                     src={`https://image.tmdb.org/t/p/w500${list.media_data?.poster_path}`}
                     alt={list.media_data?.title || list.media_data?.name}
                     className='h-50 object-cover cursor-pointer'
-                    onClick={() => { loadMovieInNewTab(list.media_id) }}
+                    onClick={() => { loadMovieInNewTab(list.media_type, list.media_id) }}
                   />
 
                   <div className='h-full w-full flex flex-col gap-2 text-left px-3 py-4'>
-                    <a href={`http://localhost:${process.env.NEXT_PUBLIC_PORT}/${list.media_type}/${list.media_id}`} target='_blank'>
+                    <a href={`${process.env.NEXT_PUBLIC_URL}/${list.media_type}/${list.media_id}`} target='_blank'>
                       <h2 className='text-2xl font-semibold'>{index + 1}. {list.media_data?.title || list.media_data?.name}</h2>
                     </a>
                     <div className='w-full flex flex-wrap gap-2'>
@@ -151,10 +122,6 @@ const WatchList = () => {
               </div>
             );
           })}
-        
-
-        
-
       </div>
 
     </div>
