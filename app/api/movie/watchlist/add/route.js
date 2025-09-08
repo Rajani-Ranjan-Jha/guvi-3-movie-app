@@ -40,7 +40,7 @@ export async function POST(request) {
     await existingUser.save()
 
     return NextResponse.json(
-      { message: "movie added to watchlist", status: 201 },
+      { message: "Movie added to watchlist" },
       { status: 201 }
     );
   } catch (error) {

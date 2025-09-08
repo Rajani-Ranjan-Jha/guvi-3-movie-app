@@ -1,7 +1,5 @@
 import ConnectToDB from "@/utils/connect";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/utils/auth";
-import { getServerSession } from "next-auth";
 import Movie from "@/models/movie";
 import Review from "@/models/review";
 
@@ -27,13 +25,15 @@ export async function POST(request) {
       });
       await newMovie.save();
 
+
+
       for (const r of reviews) {
-        // console.log("adding review:",r)
+        // console.log("aDDinG review: ",r.id)
         const newReview = new Review({
           movie_id: tmdb_id,
           author: r?.author,
           content: r?.content,
-          rating: r.author_details?.rating,
+          rating: r.author_details?.rating || Math.floor(Math.random()*10),
           createdAt:r.created_at,
           updatedAt:r.updated_at
         });
