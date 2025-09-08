@@ -2,7 +2,7 @@
 import { StarIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
-const CreateNewReview = ({ tmdb_id, tmdb_rating, isFirstReview = true, previousReview }) => {
+const CreateNewReview = ({closeWindow, tmdb_id, tmdb_rating, isFirstReview = true, previousReview }) => {
     const [rating, setRating] = useState(0)
     const [hoverRating, setHoverRating] = useState(0)
     const [title, setTitle] = useState('')
@@ -32,7 +32,8 @@ const CreateNewReview = ({ tmdb_id, tmdb_rating, isFirstReview = true, previousR
                 const res = await req.json()
                 if (req.status === 201) {
                     console.warn(res.message)
-                    // Reset form after successful submission
+                    alert(res.message)
+
                     setRating(0)
                     setTitle('')
                     setReview('')
@@ -57,7 +58,7 @@ const CreateNewReview = ({ tmdb_id, tmdb_rating, isFirstReview = true, previousR
                 if (req.status === 200) {
                     console.warn(res.message)
                     alert(res.message)
-                    // Reset form after successful submission
+                    
                     setRating(0)
                     setTitle('')
                     setReview('')
@@ -101,14 +102,14 @@ const CreateNewReview = ({ tmdb_id, tmdb_rating, isFirstReview = true, previousR
                     <label htmlFor="title">Your review:</label>
                     <textarea
                         placeholder='enter your review'
-                        className='w-full px-2 py-1 rounded-lg focus:outline-none focus:border-blue-600 border-1 border-white'
+                        className='w-full px-2 py-1 rounded-lg focus:outline-none focus:border-purple-600 border-1 border-white'
                         rows='5'
                         value={review}
                         onChange={(e) => setReview(e.target.value)}
                     />
                 </div>
 
-                <button type="submit" disabled={loading} className='bg-blue-700 text-white hover:bg-blue-800 disabled:bg-blue-400 disabled:cursor-not-allowed cursor-pointer mx-auto px-4 py-2 rounded-lg border-1 border-white mt-3 text-sm'>
+                <button type="submit" disabled={loading} className='bg-purple-700 text-white hover:bg-purple-800 disabled:bg-purple-400 disabled:cursor-not-allowed cursor-pointer mx-auto px-4 py-2 rounded-lg border-1 border-white mt-3 text-sm'>
                     {`${loading ? "Please wait.." : "Submit"}`}
                 </button>
                 

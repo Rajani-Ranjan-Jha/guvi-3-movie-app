@@ -40,7 +40,7 @@ const WatchList = () => {
     if (!context || !context.user) {
       // router.push('/login')
       return
-    } else{
+    } else {
       setWatchlist(context.watchlist)
       setLoading(false)
     }
@@ -61,21 +61,23 @@ const WatchList = () => {
 
   return (
     <>
-    <Navbar/>
-    <div className='w-full min-h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black text-white flex flex-col transition-colors duration-500'>
-      <h1 className='mx-auto text-center text-4xl font-semibold py-5'>Your Watchlist</h1>
-      <div className='w-full lg:w-4/5 mx-auto flex flex-col gap-2 justify-start items-start pb-10 lg:pb-5'>
+      <Navbar />
+      <div className='w-full min-h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black text-white flex flex-col transition-colors duration-500'>
+        <h1 className='mx-auto text-center text-4xl font-semibold py-5'>Your Watchlist</h1>
+        <div className='w-full lg:w-4/5 mx-auto flex flex-col gap-2 justify-start items-start pb-10 lg:pb-5'>
           {watchlist.map((list, index) => {
             return (
               <div className='flex flex-col gap-4 p-3 rounded-lg hover:bg-white/10 justify-start lg:h-70 w-full border-1' key={list.media_id}>
                 <div className='h-4/5 flex items-start'>
 
-                  <img
-                    src={`https://image.tmdb.org/t/p/w500${list.media_data?.poster_path}`}
-                    alt={list.media_data?.title || list.media_data?.name}
-                    className='h-50 object-cover cursor-pointer'
-                    onClick={() => { loadMovieInNewTab(list.media_type, list.media_id) }}
-                  />
+                  <a className='min-w-40' href={`${process.env.NEXT_PUBLIC_URL}/${list.media_type}/${list.media_id}`} target='_blank'>
+                    <img
+                      src={`https://image.tmdb.org/t/p/w500${list.media_data?.poster_path}`}
+                      alt={list.media_data?.title || list.media_data?.name}
+                      className='h-50 w-full object-cover cursor-pointer'
+                      onClick={() => { loadMovieInNewTab(list.media_type, list.media_id) }}
+                    />
+                  </a>
 
                   <div className='h-full w-full flex flex-col gap-2 text-left px-3 py-4'>
                     <a href={`${process.env.NEXT_PUBLIC_URL}/${list.media_type}/${list.media_id}`} target='_blank'>
@@ -122,9 +124,9 @@ const WatchList = () => {
               </div>
             );
           })}
-      </div>
+        </div>
 
-    </div>
+      </div>
     </>
   )
 }

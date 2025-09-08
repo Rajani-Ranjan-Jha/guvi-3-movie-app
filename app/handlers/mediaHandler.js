@@ -28,6 +28,17 @@ export async function searchMediaByQuery(query) {
 }
 
 export async function getMediaByCategory(mediaCategory, mediaType) {
+  const allowedCategories = [
+    "upcoming",
+    "popular",
+    "top_rated",
+    "top_grossing",
+    "trending_all_day",
+    "trending_all_week",
+    "trending_day",
+    "trending_week",
+    "anime",
+  ];
   let url = `https://api.themoviedb.org/3/${mediaType}/${mediaCategory}?language=en-US&page=1`;
   const options = {
     method: "GET",
@@ -38,6 +49,12 @@ export async function getMediaByCategory(mediaCategory, mediaType) {
   };
 
   switch (mediaCategory) {
+    case "trending_all_day":
+      url = `https://api.themoviedb.org/3/trending/all/day?language=en-US`;
+      break;
+    case "trending_all_week":
+      url = `https://api.themoviedb.org/3/trending/all/week?language=en-US`;
+      break;
     case "trending_day":
       url = `https://api.themoviedb.org/3/trending/${mediaType}/day?language=en-US`;
       break;
@@ -48,7 +65,8 @@ export async function getMediaByCategory(mediaCategory, mediaType) {
       url = `https://api.themoviedb.org/3/discover/${mediaType}?sort_by=revenue.desc?language=en-US&page=1`;
       break;
     case "anime":
-      url = `https://api.themoviedb.org/3/discover/${mediaType}?with_genres=16?language=en-US&page=1`;
+      // url = `https://api.themoviedb.org/3/discover/${mediaType}?with_genres=16?language=en-US&page=1`;
+      url = `https://api.themoviedb.org/3/discover/movie?with_genres=16?with_keywords=210024?sort_by=release_date.desc&page=1`;
       break;
 
     default:
@@ -200,6 +218,27 @@ export async function getMediaReviews(mediaId, mediaType) {
     const res = await fetch(url, options);
     const data = await res.json();
     // console.log("Reviews:", data.results);
+    return data.results;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+export async function getMediaRecommendations(mediaId, mediaType) {
+  const url = `https://api.themoviedb.org/3/${mediaType}/${mediaId}/recommendations?language=en-US&page=1`;
+
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${TMDB_TOKEN}`,
+    },
+  };
+
+  try {
+    const res = await fetch(url, options);
+    const data = await res.json();
+    // console.log("Recommendations:", data.results);
     return data.results;
   } catch (error) {
     console.error(error);

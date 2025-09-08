@@ -9,6 +9,7 @@ import { addToWatchList, removeFromWatchList } from '@/app/handlers/watchlistHan
 import { useUserContext } from '@/app/context/contextProvider'
 import { getMediaById, getMediaCredits, getMediaPictures, getMediaReviews, getMediaVideos, getMediaWatchProviders } from '@/app/handlers/mediaHandler'
 import Navbar from '@/app/components/Navbar'
+import GetRecommendations from '@/app/components/GetRecommendations'
 
 
 const MOVIE = () => {
@@ -100,7 +101,7 @@ const MOVIE = () => {
                 console.warn("No reviews fetched from TMDB to add to DB");
                 return null;
             }
-            const req = await fetch('/api/movie/load', {
+            const req = await fetch('/api/movie/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -209,12 +210,12 @@ const MOVIE = () => {
 
     const renderReviews = useCallback((review, index) => {
         return (
-            <div key={review.id || index} className='w-50 flex-shrink-0 flex-col items-start bg-white/10 border border-white/50 rounded-lg p-4 hover:bg-white/20 transition-colors duration-200 cursor-default'>
+            <div key={review.id || index} className='w-50 max-h-full flex-shrink-0 flex-col items-start bg-white/10 border border-white/50 rounded-lg p-4 hover:bg-white/20 transition-colors duration-200 cursor-default'>
                 <div className='flex items-center mb-2 space-x-2'>
                     <StarIcon size={15} className="text-yellow-400 fill-current" />
                     <span className='text-sm font-medium '>{review.rating} {`${review.author} ${review.author == user?.username ? '(you)' : ''}`}</span>
                 </div>
-                <p className='clamp-3 text-xs  max-w-full'>{`${review.content.length > 150 ? review.content.substring(0, 150) + '...' : review.content}`}</p>
+                <p className='text-xs  max-w-full'>{`${review.content.length > 150 ? review.content.substring(0, 150) + '...' : review.content}`}</p>
             </div>
         );
     }, [user]);
@@ -237,7 +238,7 @@ const MOVIE = () => {
         <>
             <Navbar />
             {movieDetails && (
-                <div className='relative w-full h-full bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black flex py-10 text-white transition-colors duration-500'>
+                <div className=' w-full h-full bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black flex py-10 text-white transition-colors duration-500'>
                     <div className='w-full lg:w-4/5 p-5 gap-5 flex flex-col  mx-auto'>
                         <div className='p-5'>
                             <div className='w-full flex justify-between items-center'>
@@ -458,6 +459,14 @@ const MOVIE = () => {
                                             )}
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* movie recommendations */}
+                            <div className='w-full  flex flex-col gap-2 justify-between border-t-1 pt-5'>
+                                <div className='flex items-center border-0 gap-2 font-semibold'>
+                                    <h2 className=' text-2xl hover:bg-text-700'>Recommendations</h2>
+                                </div>
+                                <GetRecommendations mediaId={movieDetails.id} mediaType={'movie'} />
                             </div>
                         </div>
                     </div>

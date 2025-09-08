@@ -85,7 +85,7 @@ const Navbar = () => {
   return (
     <nav className={` w-full px-4 py-1 bg-purple-700 dark:bg-black text-white dark:text-white transition-all duration-500 border-b-1`}>
       <div className='flex items-center justify-between '>
-        <div className='font-semibold text-3xl py-3'>
+        <div className='font-semibold text-3xl lg:text-4xl py-3'>
           <Link href={'/'}>Movie Master</Link>
         </div>
 
@@ -103,14 +103,14 @@ const Navbar = () => {
         </div>
 
         <div className='relative lg:w-100 hidden lg:flex flex-col'>
-          <input type="text" placeholder='search something...' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto cursor-pointer'
+          <input type="text" placeholder='What are you lookng for?' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto cursor-pointer'
             onClick={() => { setOpenSearchbar(true) }} />
         </div>
 
         <div id='nav-holder' className={`w-full lg:w-auto absolute lg:static lg:flex-row lg:flex lg:items-center lg:gap-0 blur-1 lg:bg-transparent left-0 lg:left-auto top-17 lg:top-auto transition-all duration-200 ease-in-out ${isOpen ? 'flex flex-col items-center z-50 bg-purple-600 dark:bg-black' : 'hidden'} border-b-1 lg:border-0`}>
 
           <div  className=' relative w-100 lg:hidden flex flex-col'>
-            <input type="text" placeholder='search something...' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto cursor-pointer'
+            <input type="text" placeholder='What are you lookng for?' className='w-full px-2 py-3 bg-transparent text-white focus:outline-none border-1 focus:shadow-sm focus:border-2 shadow-white rounded-md transition-all mx-auto cursor-pointer'
               onClick={() => { 
                 setIsOpen(false)
                 setOpenSearchbar(true) }} />
@@ -139,18 +139,18 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <div className='relative hover:rounded-lg hover:bg-white/20 transition-all duration-200'>
-              <button className={`${isDropDownOpen ? "border-1 border-b-0 rounded-lg rounded-b-none" : ""} cursor-pointer min-w-30 px-4 mx-auto py-3 flex justify-around font-semibold capitalize`} onClick={toggleDropDown}>
+              <button className={`${isDropDownOpen ? "lg:border-1 border-b-0 rounded-lg rounded-b-none" : ""} cursor-pointer min-w-30 px-4 mx-auto py-3 flex justify-around font-semibold capitalize`} onClick={toggleDropDown}>
                 <span className=''>{user?.username || user?.name || 'NULL'}</span>
                 <span className=''>{isDropDownOpen ? <ChevronUp /> : <ChevronDown />}</span>
               </button>
-              <ul id='dropdown-content' className={`w-full absolute border-1 border-t-0 font-semibold bg-white/20 lg:bg-purple-600 lg:dark:bg-black z-20 rounded-b-lg py-2 px-1 space-y-1 top-12 ${isDropDownOpen ? "block" : "hidden"}`}>
+              <ul id='dropdown-content' className={`w-full lg:absolute lg:border-1 border-t-0 font-semibold lg:bg-purple-600 lg:dark:bg-black z-50 rounded-b-lg py-2 px-1 space-y-1 top-12 ${isDropDownOpen ? "block" : "hidden"}`}>
                 {(currentSite !== '/watchlist' &&
                   <li className='flex'>
-                    <Link onClick={toggleDropDown} href={'/watchlist'} className='w-full px-4 py-2 rounded-lg hover:bg-white/20 text-white text-center cursor-pointer'>Watchlist</Link>
+                    <Link onClick={toggleDropDown} href={'/watchlist'} className='w-full px-4 py-2 rounded-lg lg:hover:bg-white/20 text-white text-center cursor-pointer'>Watchlist</Link>
                   </li>
                 )}
                 <li className='flex'>
-                  <button onClick={handleLogOut} className='w-full px-4 py-2 rounded-lg hover:bg-white/20 text-white cursor-pointer'>Logout</button>
+                  <button onClick={handleLogOut} className='w-full px-4 py-2 rounded-lg lg:hover:bg-white/20 text-white cursor-pointer'>Logout</button>
                 </li>
               </ul>
             </div>

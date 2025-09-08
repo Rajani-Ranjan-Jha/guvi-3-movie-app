@@ -49,16 +49,16 @@ const ShowSearchResults = () => {
 
                 <div className='w-full max-h-75 overflow-y-auto handle-scroll'>
                     {searchResult && searchResult.map((r) => (
-                        <div key={r.id} className=' ml-5 py-2 h-30 flex justify-start items-start gap-2 cursor-pointer hover:bg-white/5 transition-all delay-75 duration-150'
+                        <div key={r.id} className=' ml-5 py-2 min-h-40 flex justify-start items-start gap-2 cursor-pointer hover:bg-white/5 transition-all delay-75 duration-150'
                             onClick={() => { loadMovieDetails(r.id, r.media_type) }}>
-                            <img className='h-full text-wrap max-w-[500px]' src={`https://image.tmdb.org/t/p/w500${r?.poster_path}`} alt={'poster'} />
+                            <img className='w-30 object-cover text-wrap  rounded-md' src={`https://image.tmdb.org/t/p/w500${r?.poster_path}`} alt={'poster'} />
                             <div className='flex flex-col px-2'>
-                                <h2 className='text-left'>{r.name || r.title}</h2>
-                                <small>{new Date(r.
+                                <h2 className='text-left text-xl font-semibold'>{r.name || r.title}</h2>
+                                <small className='text-lg'>{new Date(r.
                                     release_date || r.first_air_date).getFullYear()}</small>
                                 <span className='flex items-center gap-1'>
-                                    <small><Star size={10} className='text-yellow-400 fill-current' /></small>
-                                    <small> {r.vote_average.toFixed(1)}</small>
+                                    <small className='text-lg'><Star size={10} className='text-yellow-400 fill-current' /></small>
+                                    <small className='text-lg'> {r.vote_average.toFixed(1)}</small>
                                 </span>
                             </div>
                         </div>

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUserContext } from '../context/contextProvider';
 import { getMediaByCategory } from '../handlers/mediaHandler';
 import Link from 'next/link';
-import { getTrailerLink, removeFromWatchList } from '../handlers/watchlistHandler';
+import { addToWatchList, getTrailerLink, removeFromWatchList } from '../handlers/watchlistHandler';
 
 
 
@@ -16,6 +16,15 @@ const ContentLoader = ({
     mediaTitle = `${mediaCategory} in ${mediaType}`,
 }) => {
 
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        if (isNaN(date)) return 'N/A';
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = date.toLocaleString('en-US', { month: 'short' });
+        const year = date.getFullYear();
+        return `${day} ${month} ${year}`;
+    };
 
     const context = useUserContext()
     const [user, setUser] = useState()
@@ -230,12 +239,12 @@ const ContentLoader = ({
                                                 <span className=" font-semibold">{movie.vote_average.toFixed(1)}</span>
                                             </div>
 
-                                            {/* Title with Rank */}
+                                            {/* Title */}
                                             <div className="mb-1">
                                                 <h3 className=" font-semibold text-lg leading-tight">
                                                     <Link href={`/${mediaType}/${movie.id}`}>{index + 1}. {movie.title || movie.name}</Link>
-
                                                 </h3>
+                                                <h2 className='text-sm font-semibold text-white/80'>{formatDate(movie?.release_date || movie?.first_air_date)}</h2>
                                             </div>
                                         </div>
 

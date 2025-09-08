@@ -12,9 +12,11 @@ export default function Home() {
     <>
       <Navbar />
       <div className="min-h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black space-y-10 pt-10 transition-colors duration-500">
-        <ContentLoader mediaCategory={"anime"} mediaType={"movie"} />
-        <ContentLoader mediaCategory={"popular"} mediaType="tv" />
-        <ContentLoader mediaCategory={"top_rated"} mediaType="movie" />
+        <ContentLoader mediaCategory={"trending_all_day"} mediaType={"movie"} mediaTitle={'Trending today'} />
+        <ContentLoader mediaCategory={"top_grossing"} mediaType={"movie"} mediaTitle={'Top Box office'} />
+        <ContentLoader mediaCategory={"top_rated"} mediaType="movie" mediaTitle={'The GOATs'} />
+        <ContentLoader mediaCategory={"upcoming"} mediaType="movie" mediaTitle={'Latest Releases'} />
+        <ContentLoader mediaCategory={"anime"} mediaType={"tv"} mediaTitle="New in Animations" />
       </div>
       <Footer/>
     </>

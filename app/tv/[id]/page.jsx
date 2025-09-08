@@ -9,6 +9,7 @@ import { addToWatchList, removeFromWatchList } from '@/app/handlers/watchlistHan
 import { useUserContext } from '@/app/context/contextProvider'
 import { getMediaById, getMediaCredits, getMediaPictures, getMediaReviews, getMediaVideos, getMediaWatchProviders } from '@/app/handlers/mediaHandler'
 import Navbar from '@/app/components/Navbar'
+import GetRecommendations from '@/app/components/GetRecommendations'
 
 const TV = () => {
 
@@ -106,7 +107,7 @@ const TV = () => {
                 // return [];
                 return null;
             }
-            const req = await fetch('/api/movie/load', {
+            const req = await fetch('/api/movie/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -243,7 +244,7 @@ const TV = () => {
         <>
             <Navbar />
             {tvDetails && (
-                <div className='relative w-full h-full bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black flex py-10 text-white transition-colors duration-500'>
+                <div className=' w-full h-full bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black flex py-10 text-white transition-colors duration-500'>
                     <div className='w-full lg:w-4/5 p-5 gap-5 flex flex-col mx-auto'>
                         <div className='p-5'>
                             <div className='w-full flex justify-between items-center'>
@@ -462,6 +463,14 @@ const TV = () => {
                                             )}
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* movie recommendations */}
+                            <div className='w-full  flex flex-col gap-2 justify-between border-t-1 pt-5'>
+                                <div className='flex items-center border-0 gap-2 font-semibold'>
+                                    <h2 className=' text-2xl hover:bg-text-700'>Recommendations</h2>
+                                </div>
+                                <GetRecommendations mediaId={tvDetails.id} mediaType={'tv'} />
                             </div>
                         </div>
                     </div>
