@@ -8,7 +8,7 @@ const GetRecommendations = ({ mediaId, mediaType }) => {
 
     const loadMediaRecommendations = async () => {
         const output = await getMediaRecommendations(mediaId, mediaType)
-        console.log("Recommendations:", output);
+        // console.log("Recommendations:", output);
         setRecommendations(output)
     }
 
@@ -29,6 +29,15 @@ const GetRecommendations = ({ mediaId, mediaType }) => {
         )
     }
 
+    if(recommendations.length === 0){
+        return (
+            <div className="w-full h-20 flex flex-col justify-center items-center ">
+                <p className=" text-lg
+                font-normal">No Recommendations Found</p>
+            </div>
+        )
+    }
+
 
     return (
         <div className='w-full min-h-100 overflow-y-auto handle-scroll py-5 flex justify-start items-start text-white'>
@@ -40,7 +49,7 @@ const GetRecommendations = ({ mediaId, mediaType }) => {
                         className="rounded-lg h-70 object-contain hover:scale-102 transition-all duration-300 cursor-pointer"
 
                     />
-                    <h3 className='text-xl font-semibold'>{rec.title || rec.name}</h3>
+                    <h3 className='text-lg font-semibold'>{rec.title || rec.name}</h3>
 
                 </a>
             ))}

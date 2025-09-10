@@ -17,6 +17,7 @@ const movieSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Review",
       required: true,
+      unique: true,
     },
   ],
 });

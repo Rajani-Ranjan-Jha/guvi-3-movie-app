@@ -4,9 +4,9 @@ import { ChevronLeft, ChevronRight, Plus, Play, Star, BookmarkPlus, BookmarkChec
 import { useRouter } from 'next/navigation';
 
 import { useUserContext } from '../context/contextProvider';
-import { getMediaByCategory } from '../handlers/mediaHandler';
+import { getMediaByCategory, getMediaVideos } from '../handlers/mediaHandler';
 import Link from 'next/link';
-import { addToWatchList, getTrailerLink, removeFromWatchList } from '../handlers/watchlistHandler';
+import { addToWatchList, removeFromWatchList } from '../handlers/watchlistHandler';
 
 
 
@@ -104,14 +104,14 @@ const ContentLoader = ({
         }, 300);
     };
 
-    const handleMediaClick = (id) => {
-        router.push(`/${mediaType}/${id}`)
+    const handleMediaClick = (mediaType,mediaId) => {
+        router.push(`/${mediaType}/${mediaId}`)
     }
 
-    const handleWatchList = async (contentId) => {
-        if(!user){
+    const handleWatchList = async (contentType, contentId) => {
+        if (!user) {
             alert("Please login to add to watchlist")
-            router.push('/login')
+            // router.push('/login')
             return
         }
         const alreadyExists = userWatchlist.includes(contentId);
@@ -123,7 +123,7 @@ const ContentLoader = ({
                 alert("failed to remove from watchlist");
             }
         } else {
-            const result = await addToWatchList(contentId, mediaType, user.email);
+            const result = await addToWatchList(contentId, contentType, user.email);
             if (result) {
                 setUserWatchlist([...userWatchlist, contentId]);
             } else {
@@ -132,9 +132,12 @@ const ContentLoader = ({
         }
     }
 
-    const handleTrailerClick = async (contentId) => {
-        const TrailerObj = await getTrailerLink(contentId)
-        window.open(`https://www.youtube.com/watch?v=${TrailerObj.key}`, '_blank')
+    const handleTrailerClick = async (contentType, contentId) => {
+        const output = await getMediaVideos(contentId, contentType)
+        const filtered = await output.filter(
+            (i) => i.type == "Trailer" && i.site == "YouTube"
+        );
+        window.open(`https://www.youtube.com/watch?v=${filtered[0].key}`, '_blank')
     }
 
     useEffect(() => {
@@ -161,128 +164,128 @@ const ContentLoader = ({
     if (Movies && Movies.length != 0) {
         return (
             <>
-            <div className="p-6 px-10 text-white">
-                <div className="w-full mx-auto">
-                    {/* Category Title */}
-                    <div className="flex items-center mb-6">
-                        <div className="w-1 h-8 bg-white dark:bg-purple-600 mr-3"></div>
-                        <h2 className="text-2xl font-bold">{mediaTitle || 'No title'}</h2>
-                    </div>
+                <div className="p-6 px-10 text-white">
+                    <div className="w-full mx-auto">
+                        {/* Category Title */}
+                        <div className="flex items-center mb-6">
+                            <div className="w-1 h-8 bg-white dark:bg-purple-600 mr-3"></div>
+                            <h2 className="text-2xl font-bold">{mediaTitle || 'No title'}</h2>
+                        </div>
 
-                    {/* Movie Carousel Container */}
-                    <div className="relative">
-                        {/* Left Arrow */}
-                        {showLeftArrow && (
-                            <button
-                                onClick={() => scroll('left')}
-                                className={`hidden md:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10  bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                            >
-                                <ChevronLeft size={24} />
-                            </button>
-                        )}
-
-                        {/* Right Arrow */}
-                        {showRightArrow && (
-                            <button
-                                onClick={() => scroll('right')}
-                                className={`hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10   bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                            >
-                                <ChevronRight size={24} />
-                            </button>
-                        )}
-
-                        {/* Movies Container */}
-                        <div
-                            ref={scrollContainerRef}
-                            className="flex overflow-x-auto scrollbar-hide scroll-smooth"
-                        >
-                            {Movies.map((movie, index) => (
-                                <div
-                                    key={movie.id}
-                                    className="w-64 ml-4 flex-shrink-0 flex-col justify-between items-center bg-white/15 dark:bg-white/5 rounded-lg overflow-hidden  transition-transform duration-200 border-0"
+                        {/* Movie Carousel Container */}
+                        <div className="relative">
+                            {/* Left Arrow */}
+                            {showLeftArrow && (
+                                <button
+                                    onClick={() => scroll('left')}
+                                    className={`hidden md:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10  bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                                 >
-                                    {/* Movie Poster */}
-                                    <div className="relative"
+                                    <ChevronLeft size={24} />
+                                </button>
+                            )}
+
+                            {/* Right Arrow */}
+                            {showRightArrow && (
+                                <button
+                                    onClick={() => scroll('right')}
+                                    className={`hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10   bg-white/20 dark:bg-purple-600/80 px-3 py-5 rounded-none border-1 transition-opacity duration-300 cursor-pointer ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                >
+                                    <ChevronRight size={24} />
+                                </button>
+                            )}
+
+                            {/* Movies Container */}
+                            <div
+                                ref={scrollContainerRef}
+                                className="flex overflow-x-auto scrollbar-hide scroll-smooth"
+                            >
+                                {Movies.map((movie, index) => (
+                                    <div
+                                        key={movie.id}
+                                        className="w-64 ml-4 flex-shrink-0 flex-col justify-between items-center bg-white/15 dark:bg-white/5 rounded-lg overflow-hidden  transition-transform duration-200 border-0"
                                     >
-                                        <img
-                                            src={`https://image.tmdb.org/t/p/w400${movie.poster_path}`}
-                                            alt={movie?.original_title || movie.name}
-                                            className="w-full h-80 object-cover hover:scale-102"
+                                        {/* Movie Poster */}
+                                        <div className="relative"
+                                        >
+                                            <img
+                                                src={`https://image.tmdb.org/t/p/w400${movie.poster_path}`}
+                                                alt={movie?.original_title || movie.name}
+                                                className="w-full h-80 object-cover hover:scale-102"
 
-                                        />
+                                            />
 
-                                        {/* Watchlist Button */}
-                                        <button className="absolute z-10 top-3 left-3 bg-black/50 hover:bg-black/80 bg-opacity-60 hover:bg-opacity-80 p-2 rounded-sm transition-all duration-200 cursor-pointer"
-                                            onClick={() => handleWatchList(movie.id)}>
-                                            {userWatchlist && userWatchlist.includes(movie.id) ? (
-                                                <BookmarkCheck size={20} className="" />
-                                            ) : (
-                                                <BookmarkPlus size={20} className="" />
-                                            )}
-
-                                        </button>
-
-                                        {/* Play Overlay */}
-                                        <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-40 flex items-center justify-center transition-opacity duration-200"
-                                            onClick={() => {
-                                                handleMediaClick(movie.id)
-                                            }}>
-                                            <Play size={40} className="" />
-                                        </div>
-                                    </div>
-
-                                    {/* Movie Info */}
-                                    <div className="h-50 px-4 py-2 flex flex-col">
-                                        <div className="flex flex-col flex-1">
-                                            <div className="flex items-center mb-2">
-                                                <Star size={16} className="text-yellow-400 fill-current mr-1" />
-                                                <span className=" font-semibold">{movie.vote_average.toFixed(1)}</span>
-                                            </div>
-
-                                            {/* Title */}
-                                            <div className="mb-1">
-                                                <h3 className=" font-semibold text-lg leading-tight">
-                                                    <Link href={`/${mediaType}/${movie.id}`}>{index + 1}. {movie.title || movie.name}</Link>
-                                                </h3>
-                                                <h2 className='text-sm font-semibold text-white/80'>{formatDate(movie?.release_date || movie?.first_air_date)}</h2>
-                                            </div>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="space-y-2 mt-auto">
-                                            <button className="w-full hover:bg-purple-400/40  py-2 px-4 rounded-full font-semibold transition-colors duration-200 cursor-pointer"
-                                                onClick={() => handleWatchList(movie.id)}>
+                                            {/* Watchlist Button */}
+                                            <button className="absolute z-10 top-3 left-3 bg-black/50 hover:bg-black/80 bg-opacity-60 hover:bg-opacity-80 p-2 rounded-sm transition-all duration-200 cursor-pointer"
+                                                onClick={() => handleWatchList(movie.media_type || mediaType, movie.id)}>
                                                 {userWatchlist && userWatchlist.includes(movie.id) ? (
-                                                    <div className='flex justify-center items-center gap-2'>
-                                                        <span><Check size={20} className="text-white" /></span>
-                                                        <span>Watchlist</span>
-                                                    </div>
-
+                                                    <BookmarkCheck size={20} className="" />
                                                 ) : (
-                                                    <div className='flex justify-center items-center gap-2'>
-                                                        <span><Plus size={20} className="text-white" /></span>
-                                                        <span>Watchlist</span>
-                                                    </div>
-
+                                                    <BookmarkPlus size={20} className="" />
                                                 )}
+
                                             </button>
 
-                                            <button className="w-full text-white dark:text-purple-600 font-semibold hover:bg-white/20 dark:hover:bg-purple-600/20 py-2 px-4 rounded-full transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer"
-                                                onClick={() => handleTrailerClick(movie.id)}
-                                            >
-                                                <Play size={14} className='fill-current' />
-                                                Trailer
-                                            </button>
+                                            {/* Play Overlay */}
+                                            <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-40 flex items-center justify-center transition-opacity duration-200"
+                                                onClick={() => {
+                                                    handleMediaClick(movie.media_type || mediaType, movie.id)
+                                                }}>
+                                                <Play size={40} className="" />
+                                            </div>
+                                        </div>
+
+                                        {/* Movie Info */}
+                                        <div className="h-50 px-4 py-2 flex flex-col">
+                                            <div className="flex flex-col flex-1">
+                                                <div className="flex items-center mb-2">
+                                                    <Star size={16} className="text-yellow-400 fill-current mr-1" />
+                                                    <span className=" font-semibold">{movie.vote_average.toFixed(1)}</span>
+                                                </div>
+
+                                                {/* Title */}
+                                                <div className="mb-1">
+                                                    <h3 className=" font-semibold text-lg leading-tight">
+                                                        <Link href={`/${movie.media_type || mediaType}/${movie.id}`}>{index + 1}. {movie.title || movie.name}</Link>
+                                                    </h3>
+                                                    <h2 className='text-sm font-semibold text-white/80'>{formatDate(movie?.release_date || movie?.first_air_date)}</h2>
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="space-y-2 mt-auto">
+                                                <button className="w-full hover:bg-purple-400/40  py-2 px-4 rounded-full font-semibold transition-colors duration-200 cursor-pointer"
+                                                    onClick={() => handleWatchList(movie.media_type || mediaType, movie.id)}>
+                                                    {userWatchlist && userWatchlist.includes(movie.id) ? (
+                                                        <div className='flex justify-center items-center gap-2'>
+                                                            <span><Check size={20} className="text-white" /></span>
+                                                            <span>Watchlist</span>
+                                                        </div>
+
+                                                    ) : (
+                                                        <div className='flex justify-center items-center gap-2'>
+                                                            <span><Plus size={20} className="text-white" /></span>
+                                                            <span>Watchlist</span>
+                                                        </div>
+
+                                                    )}
+                                                </button>
+
+                                                <button className="w-full text-white dark:text-purple-600 font-semibold hover:bg-white/20 dark:hover:bg-purple-600/20 py-2 px-4 rounded-full transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                                                    onClick={() => handleTrailerClick(movie.media_type || mediaType, movie.id)}
+                                                >
+                                                    <Play size={14} className='fill-current' />
+                                                    Trailer
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
+
+
                 </div>
-
-
-            </div>
             </>
         );
     } else {

@@ -7,6 +7,7 @@ import { formatMinutes, formatNumber } from '@/utils/formatter'
 import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
 import { removeFromWatchList } from '../handlers/watchlistHandler'
+import Footer from '../components/Footer'
 
 const WatchList = () => {
 
@@ -127,6 +128,7 @@ const WatchList = () => {
         </div>
 
       </div>
+      <Footer/>
     </>
   )
 }

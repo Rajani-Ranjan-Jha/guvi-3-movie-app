@@ -16,12 +16,10 @@ export const authOptions = {
         try {
           await ConnectToDB();
 
-          // Default: sign-in via credentials
           if (!credentials?.email || !credentials?.password) {
             throw new Error("Missing email or password");
           }
 
-          // console.log("arrived in next-auth:",credentials?.email, credentials?.password)
 
           const user = await User.findOne({ email: credentials.email }).select(
             "+password"
@@ -59,14 +57,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    // async signIn({ user, account, profile }) {
-    //   try {
-    //     return true;
-    //   } catch (error) {
-    //     console.error("Error in signIn callback:", error);
-    //     return false;
-    //   }
-    // },
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -86,13 +77,12 @@ export const authOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
     signUp: "/register",
-    error: "/api/auth/error",
   },
   debug: process.env.NODE_ENV === "development",
 };

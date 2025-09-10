@@ -215,7 +215,7 @@ const MOVIE = () => {
                     <StarIcon size={15} className="text-yellow-400 fill-current" />
                     <span className='text-sm font-medium '>{review.rating} {`${review.author} ${review.author == user?.username ? '(you)' : ''}`}</span>
                 </div>
-                <p className='text-xs  max-w-full'>{`${review.content.length > 150 ? review.content.substring(0, 150) + '...' : review.content}`}</p>
+                <p className='text-xs max-w-full break-words overflow-hidden'>{`${review.content.length > 150 ? review.content.substring(0, 150) + '...' : review.content}`}</p>
             </div>
         );
     }, [user]);

@@ -16,7 +16,7 @@ export default function Home() {
         <ContentLoader mediaCategory={"top_grossing"} mediaType={"movie"} mediaTitle={'Top Box office'} />
         <ContentLoader mediaCategory={"top_rated"} mediaType="movie" mediaTitle={'The GOATs'} />
         <ContentLoader mediaCategory={"upcoming"} mediaType="movie" mediaTitle={'Latest Releases'} />
-        <ContentLoader mediaCategory={"anime"} mediaType={"tv"} mediaTitle="New in Animations" />
+        <ContentLoader mediaCategory={"anime"} mediaType={"movie"} mediaTitle="New in Animations" />
       </div>
       <Footer/>
     </>

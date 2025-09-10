@@ -18,22 +18,6 @@
 
 
 
-.gradient-light {
-  background: linear-gradient(to right, #910cea, #420c57, #600f78);
-}
-
-.gradient-dark {
-  background: linear-gradient(to right, #f8fafc, #1a1a1a, #000000);
-}
-
-.color-plette {
-  background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
-    linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
-  background-size: "20px 30px";
-  -webkit-mask-image: "radial-gradient(ellipse 70% 60% at 50% 0%, #000 60%, transparent 100%)";
-  mask-image: "radial-gradient(ellipse 70% 60% at 50% 0%, #000 60%, transparent 100%)";
-}
-
 .blur-1 {
   /* background-color: gray; */
   background-color: transparent;
@@ -46,13 +30,6 @@
   opacity: 100%;
 }
 
-.clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3; /* Number of lines to show */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .handle-scroll {
   scroll-behavior: smooth;
@@ -79,3 +56,5 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+

@@ -28,17 +28,7 @@ export async function searchMediaByQuery(query) {
 }
 
 export async function getMediaByCategory(mediaCategory, mediaType) {
-  const allowedCategories = [
-    "upcoming",
-    "popular",
-    "top_rated",
-    "top_grossing",
-    "trending_all_day",
-    "trending_all_week",
-    "trending_day",
-    "trending_week",
-    "anime",
-  ];
+
   let url = `https://api.themoviedb.org/3/${mediaType}/${mediaCategory}?language=en-US&page=1`;
   const options = {
     method: "GET",
@@ -65,8 +55,7 @@ export async function getMediaByCategory(mediaCategory, mediaType) {
       url = `https://api.themoviedb.org/3/discover/${mediaType}?sort_by=revenue.desc?language=en-US&page=1`;
       break;
     case "anime":
-      // url = `https://api.themoviedb.org/3/discover/${mediaType}?with_genres=16?language=en-US&page=1`;
-      url = `https://api.themoviedb.org/3/discover/movie?with_genres=16?with_keywords=210024?sort_by=release_date.desc&page=1`;
+      url = `https://api.themoviedb.org/3/discover/${mediaType}?with_genres=16?sort_by=release_date.desc&page=1`;
       break;
 
     default:
@@ -125,7 +114,6 @@ export async function getMediaVideos(mediaId, mediaType) {
 }
 export async function getMediaPictures(mediaId, mediaType) {
   const url = `https://api.themoviedb.org/3/${mediaType}/${mediaId}/images`;
-  // `tv/series_id/images`
   const options = {
     method: "GET",
     headers: {
@@ -145,7 +133,6 @@ export async function getMediaPictures(mediaId, mediaType) {
 }
 export async function getMediaCredits(mediaId, mediaType) {
   const url = `https://api.themoviedb.org/3/${mediaType}/${mediaId}/credits?language=en-US`;
-  // `tv/series_id/credits?language=en-US`
   const options = {
     method: "GET",
     headers: {
@@ -195,8 +182,7 @@ export async function getMediaWatchProviders(mediaId, mediaType) {
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-    // console.log("OTT (action.js):", data.results);
-
+    // console.log("OTT:", data.results);
     return data.results;
   } catch (error) {
     console.error(error);
@@ -205,7 +191,6 @@ export async function getMediaWatchProviders(mediaId, mediaType) {
 }
 export async function getMediaReviews(mediaId, mediaType) {
   const url = `https://api.themoviedb.org/3/${mediaType}/${mediaId}/reviews?language=en-US&page=1`;
-  // `3/tv/series_id/reviews?language=en-US&page=1`
   const options = {
     method: "GET",
     headers: {

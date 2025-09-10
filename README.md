@@ -2,7 +2,7 @@
 
 Movie Master is a modern web application designed for movie enthusiasts to discover, track, and review their favorite movies and TV shows. Built with Next.js and Tailwind CSS, it offers a sleek, responsive interface with dark mode support.
 
-## Features
+## Features ✨
 
 - **Browse Content**: Explore popular, top-rated, and trending movies and TV shows
 - **Watchlist Management**: Create and manage your personal watchlist
@@ -12,7 +12,7 @@ Movie Master is a modern web application designed for movie enthusiasts to disco
 - **Responsive Design**: Optimized for desktop and mobile devices
 - **Search Functionality**: Find movies and TV shows quickly
 
-## Tech Stack
+## Tech Stack 🛠️ 
 
 - **Frontend**: Next.js, React, Tailwind CSS
 - **Backend**: Next.js API routes, MongoDB
@@ -20,7 +20,7 @@ Movie Master is a modern web application designed for movie enthusiasts to disco
 - **Icons**: Lucide React
 - **Database**: Mongoose for MongoDB integration
 
-## Getting Started
+## Getting Started 🚀
 
 ### Prerequisites
 
@@ -43,20 +43,11 @@ Movie Master is a modern web application designed for movie enthusiasts to disco
 3. Set up environment variables:
    Create a `.env` file in the root directory and add the following secrets:
    ```bash
-
    MONGO_URI_LOCAL = <mongodb_local_url>
-
-
    NODE_ENV = 'development'
    NEXTAUTH_SECRET = <your_secret>
-
    NEXT_PUBLIC_URL = http://localhost:<your_port>
-
-
-
    NEXT_PUBLIC_TMDB_ACCESS_TOKEN = <tmdb_access_token>
-
-
    ```
 
 4. Run the development server:
@@ -66,7 +57,7 @@ Movie Master is a modern web application designed for movie enthusiasts to disco
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Project Structure
+## Project Structure 📁
 
 - `app/`: Next.js app directory with pages and components
 - `components/`: Reusable React components
@@ -75,7 +66,7 @@ Movie Master is a modern web application designed for movie enthusiasts to disco
 - `utils/`: Utility functions
 - `public/`: Static assets
 
-## Pages
+## Pages 
 
 - **Home** (`/`): Browse featured content
 - **About** (`/about`): Learn more about Movie Master
