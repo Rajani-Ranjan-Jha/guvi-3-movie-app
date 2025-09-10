@@ -43,7 +43,7 @@ Movie Master is a modern web application designed for movie enthusiasts to disco
 3. Set up environment variables:
    Create a `.env` file in the root directory and add the following secrets:
    ```bash
-   MONGO_URI_LOCAL = <mongodb_local_url>
+   MONGO_URI_CLOUD = <mongodb_local_url>
    NODE_ENV = 'development'
    NEXTAUTH_SECRET = <your_secret>
    NEXT_PUBLIC_URL = http://localhost:<your_port>

@@ -64,7 +64,7 @@ const Navbar = () => {
 
   // Function to toggle theme
   const toggleTheme = () => {
-    console.log(theme)
+    // console.log(theme)
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
