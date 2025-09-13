@@ -58,7 +58,7 @@ const ShowSearchResults = () => {
                                     release_date || r.first_air_date).getFullYear()}</small>
                                 <span className='flex items-center gap-1'>
                                     <small className='text-lg'><Star size={10} className='text-yellow-400 fill-current' /></small>
-                                    <small className='text-lg'> {r.vote_average.toFixed(1)}</small>
+                                    <small className='text-lg'> {r?.vote_average.toFixed(1)}</small>
                                 </span>
                             </div>
                         </div>

@@ -52,6 +52,8 @@ const Genre = () => {
 
     useEffect(() => {
         loadMediaByGenre();
+        document.title = `${id.split('-')[1][0].toUpperCase() + id.split('-')[1].slice(1,)} - Movie Master`
+
     }, [id, type])
 
     if (loading) {
@@ -112,8 +114,8 @@ const Genre = () => {
                                     <h2 className='text-lg font-bold'>{m.title || m.name}</h2>
                                 </a>
                                 <p className='text-sm flex items-center gap-1'>
-                                    <span><Star size={15} className='text-yellow-400 fill-current'/></span>
-                                    <span>{m.vote_average.toFixed(1)}</span>
+                                    <span><Star size={15} className='text-yellow-400 fill-current' /></span>
+                                    <span>{m?.vote_average.toFixed(1)}</span>
                                 </p>
                                 <p className='text-sm text-gray-300'>{m.release_date || m.first_air_date}</p>
                                 <p className='text-sm md:hidden'>{`${m?.overview.length > 130 ? m?.overview.slice(0, 130) + '.....' : m?.overview}`}</p>

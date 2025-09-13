@@ -202,13 +202,13 @@ export async function getMediaCredits(mediaId, mediaType) {
     const res = await fetch(url, options);
     const data = await res.json();
     const casts = await data.cast;
-    const directors = await data.crew.filter((i) => i.job == "Director");
+    const directors = await data.crew.filter((i) => i.job.startsWith("Direct"));
     const writers = await data.crew.filter(
       (i) =>
-        i.job.startsWith("Wri") ||
-        i.job.startsWith("Screen") ||
-        i.job.startsWith("Sto") ||
-        i.job.startsWith("Auth")
+        i.known_for_department.startsWith("Wri") ||
+        i.known_for_department.startsWith("Screen") ||
+        i.known_for_department.startsWith("Sto") ||
+        i.known_for_department.startsWith("Auth")
     );
     const Already = [];
     writers.forEach((item, index) => {
@@ -220,7 +220,7 @@ export async function getMediaCredits(mediaId, mediaType) {
     });
 
     // console.log({ casts, directors, writers });
-    // console.log(data);
+    // console.log(data.crew);
     return { casts, directors, writers };
     // return data
   } catch (error) {

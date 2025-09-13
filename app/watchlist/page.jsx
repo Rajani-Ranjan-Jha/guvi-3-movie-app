@@ -58,6 +58,22 @@ const WatchList = () => {
     )
   }
 
+  if(watchlist.length == 0){
+    return (
+      <>
+        <Navbar />
+        <div className='w-full min-h-screen bg-gradient-to-r from-purple-500 via-purple-900 to-purple-500 dark:from-black dark:via-black/90 dark:to-black text-white flex flex-col justify-center transition-colors duration-500'>
+          <h1 className='mx-auto text-center text-4xl font-semibold py-5'>Your Watchlist is Empty</h1>
+          <div className='w-full lg:w-4/5 mx-auto flex flex-col gap-2 justify-start items-center pb-10 lg:pb-5'>
+            <p className='text-lg text-center'>You have not added any movies or TV shows to your watchlist yet.</p>
+            <p className='text-lg text-center'>Browse and add some to see them here!</p>
+          </div>
+        </div>
+        <Footer/>
+      </>
+    )
+  }
+
 
 
   return (
@@ -105,7 +121,7 @@ const WatchList = () => {
                     <div className='flex items-center w-full text-sm'>
                       <Star size={12} className='text-yellow-400 fill-current' />
                       <span>
-                        {`${list.media_data.vote_average.toFixed(2)}(${formatNumber(list.media_data.vote_count)})`}
+                        {`${list.media_data?.vote_average.toFixed(1)}(${formatNumber(list.media_data.vote_count)})`}
                       </span>
                     </div>
                   </div>

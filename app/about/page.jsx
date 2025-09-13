@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 
 export default function About() {
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function About() {
           <p className='font-normal'><a className='underline' href="https://rajani-ranjan-jha.vercel.app/" target='_blank'>Rajani Ranjan Jha</a> (me), an enthusiastic developer from IIT Patna, is the creator and maintainer of Movie Master. His passion for film and knowledge of web-technology shines through in this project, which aims to enrich the entertainment journey for movie lovers and TV enthusiasts alike.</p>
         </div>
       </div>
+      <Footer/>
     </>
   )
 }

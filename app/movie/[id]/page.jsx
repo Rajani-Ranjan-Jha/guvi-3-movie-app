@@ -262,7 +262,7 @@ const MOVIE = () => {
                                 </span>
                                 <span className='flex items-center gap-1 bg-white dark:bg-white/20 text-purple-700 dark:text-white font-semibold cursor-default text-center p-2 py-1 text-xs rounded-md'>
                                     <Star size={15} className='text-yellow-400 fill-current' />
-                                    <span>{movieDetails.vote_average.toFixed(1)}</span>
+                                    <span>{movieDetails?.vote_average.toFixed(1)}</span>
                                 </span>
                             </div>
                         </div>
@@ -368,7 +368,7 @@ const MOVIE = () => {
                                     </div>
                                 )}
                                 <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
-                                    Rating: {`${movieDetails.vote_average.toFixed(1)} (${formatNumber(movieDetails.vote_count)})`}
+                                    Rating: {`${movieDetails?.vote_average.toFixed(1)} (${formatNumber(movieDetails.vote_count)})`}
                                 </div>
                                 <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
                                     Runtime: {formatMinutes(movieDetails.runtime)}

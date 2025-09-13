@@ -239,7 +239,7 @@ const ContentLoader = ({
                                             <div className="flex flex-col flex-1">
                                                 <div className="flex items-center mb-2">
                                                     <Star size={16} className="text-yellow-400 fill-current mr-1" />
-                                                    <span className=" font-semibold">{movie.vote_average.toFixed(1)}</span>
+                                                    <span className=" font-semibold">{movie?.vote_average?.toFixed(1)}</span>
                                                 </div>
 
                                                 {/* Title */}
