@@ -268,7 +268,7 @@ const TV = () => {
                                 </span>
                                 <span className='flex items-center gap-1 bg-white dark:bg-white/20 text-purple-700 dark:text-white font-semibold cursor-defaulttext-center p-2 py-1 text-xs rounded-md'>
                                     <Star size={15} className='text-yellow-400 fill-current' />
-                                    <span>{tvDetails.vote_average.toFixed(1)}</span>
+                                    <span>{tvDetails?.vote_average.toFixed(1)}</span>
                                 </span>
                             </div>
                         </div>
@@ -377,7 +377,7 @@ const TV = () => {
                                     </div>
                                 )}
                                 <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
-                                    Rating: {`${tvDetails.vote_average.toFixed(1)} (${formatNumber(tvDetails.vote_count)})`}
+                                    Rating: {`${tvDetails?.vote_average.toFixed(1)} (${formatNumber(tvDetails.vote_count)})`}
                                 </div>
                                 <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
                                     Length: {`${tvDetails.number_of_seasons} seasons, ${tvDetails.number_of_episodes} episodes`}

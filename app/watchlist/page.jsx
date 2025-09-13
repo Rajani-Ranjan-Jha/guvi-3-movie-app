@@ -105,7 +105,7 @@ const WatchList = () => {
                     <div className='flex items-center w-full text-sm'>
                       <Star size={12} className='text-yellow-400 fill-current' />
                       <span>
-                        {`${list.media_data.vote_average.toFixed(2)}(${formatNumber(list.media_data.vote_count)})`}
+                        {`${list.media_data?.vote_average.toFixed(1)}(${formatNumber(list.media_data.vote_count)})`}
                       </span>
                     </div>
                   </div>
