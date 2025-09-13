@@ -26,9 +26,7 @@ export async function searchMediaByQuery(query) {
     return null;
   }
 }
-
 export async function getMediaByCategory(mediaCategory, mediaType) {
-
   let url = `https://api.themoviedb.org/3/${mediaType}/${mediaCategory}?language=en-US&page=1`;
   const options = {
     method: "GET",
@@ -66,6 +64,66 @@ export async function getMediaByCategory(mediaCategory, mediaType) {
     const data = await res.json();
     // console.log(data.results)
     return data.results;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+export async function getMediaByGenre(genreId, mediaType) {
+  const url = `https://api.themoviedb.org/3/discover/${mediaType}?with_genres=${genreId}`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${TMDB_TOKEN}`,
+    },
+  };
+
+  try {
+    const res = await fetch(url, options);
+    const data = await res.json();
+    return data;
+    // console.log(data)
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+export async function getPersonDetails(personId) {
+  const url = `https://api.themoviedb.org/3/person/${personId}?language=en-US`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${TMDB_TOKEN}`,
+    },
+  };
+
+  try {
+    const res = await fetch(url, options);
+    const data = await res.json();
+    // console.log(data)
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+export async function getPersonCredits(personId) {
+  const url = `https://api.themoviedb.org/3/person/${personId}/combined_credits`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${TMDB_TOKEN}`,
+    },
+  };
+
+  try {
+    const res = await fetch(url, options);
+    const data = await res.json();
+    // console.log(data)
+    return data;
   } catch (error) {
     console.error(error);
     return null;

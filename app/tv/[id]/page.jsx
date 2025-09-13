@@ -13,7 +13,7 @@ import GetRecommendations from '@/app/components/GetRecommendations'
 
 const TV = () => {
 
-    
+
     const { id } = useParams()
     const context = useUserContext()
     const [user, setUser] = useState({})
@@ -328,7 +328,7 @@ const TV = () => {
                                 {/* genres */}
                                 <div className='w-full flex flex-wrap gap-2 p-2'>
                                     {tvDetails.genres.map((g, i) => (
-                                        <div className='px-2 py-1 text-xs hover:bg-white/20 text-center rounded-2xl border-1 border-slate-100 cursor-default transition-all duration-150' key={g.id}>{g.name}</div>
+                                        <a href={`${process.env.NEXT_PUBLIC_URL}/genre/${g.id}-${g.name.toLowerCase().replaceAll(' ','-')}/tv`} target='_blank' className='px-2 py-1 text-xs hover:bg-white/20 text-center rounded-2xl border-1 border-slate-100  transition-all duration-150' key={g.id}>{g.name}</a>
                                     ))
                                     }
                                 </div>
@@ -343,13 +343,32 @@ const TV = () => {
                             {/* extra info div */}
                             <div className='w-full flex flex-col gap-2 justify-center'>
                                 {/* director */}
-                                <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
-                                    Director: {tvDirectors[0]?.name || 'Not Found'}
+                                <div className='flex items-center gap-2 border-t-1 border-t-white p-2 py-1 text-sm'>
+                                    <span>Director:</span>
+                                    {tvDirectors && tvDirectors.length > 0 ? (
+                                        tvDirectors.map((director, index) => (
+                                            <a className='text-blue-500 hover:underline hover:text-blue-600' href={`${process.env.NEXT_PUBLIC_URL}/person/${director.id}`} target='_blank' key={director.id}>
+                                                {director.name}{index < tvDirectors.length - 1 ? ', ' : ''}
+                                            </a>
+                                        ))
+                                    ) : (
+                                        <span>No Directors</span>
+                                    )}
+
                                 </div>
 
                                 {/* writer */}
-                                <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
-                                    Writer: {tvWriters.length > 0 ? tvWriters.map(w => w.name).join(', ') : 'Not Found'}
+                                <div className='flex items-center gap-2 border-t-1 border-t-white p-2 py-1 text-sm'>
+                                    <span>Writers:</span>
+                                    {tvWriters && tvWriters.length > 0 ? (
+                                        tvWriters.map((writer, index) => (
+                                            <a className='text-blue-500 hover:underline hover:text-blue-600' href={`${process.env.NEXT_PUBLIC_URL}/person/${writer.id}`} target='_blank' key={writer.id}>
+                                                {writer.name}{index < tvWriters.length - 1 ? ', ' : ''}
+                                            </a>
+                                        ))
+                                    ) : (
+                                        <span>No Writers</span>
+                                    )}
                                 </div>
 
                                 {tvDetails.status == 'Released' && (
@@ -358,7 +377,7 @@ const TV = () => {
                                     </div>
                                 )}
                                 <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
-                                    Rating: {`${tvDetails.vote_average} (${formatNumber(tvDetails.vote_count)})`}
+                                    Rating: {`${tvDetails.vote_average.toFixed(1)} (${formatNumber(tvDetails.vote_count)})`}
                                 </div>
                                 <div className='border-t-1 border-t-white p-2 py-1 text-sm'>
                                     Length: {`${tvDetails.number_of_seasons} seasons, ${tvDetails.number_of_episodes} episodes`}
@@ -407,14 +426,17 @@ const TV = () => {
                                             className='bg-white/20 md:bg-transparent w-full md:w-2/5 my-2 flex justify-start items-center gap-5  md:hover:bg-white/20 rounded-2xl cursor-default transition-all duration-300'
                                             key={cast.id}
                                         >
-                                            {cast.profile_path ? (<img
-                                                className='w-25 h-25 rounded-full border-1 border-white object-cover' src={`https://image.tmdb.org/t/p/w500${cast?.profile_path}`} alt={cast.name} />) :
+                                            {cast.profile_path ? (<a href={`${process.env.NEXT_PUBLIC_URL}/person/${cast?.id}`} target='_blank'>
+
+                                                <img
+                                                    className='w-25 h-25 rounded-full border-1 border-white object-cover' src={`https://image.tmdb.org/t/p/w500${cast?.profile_path}`} alt={cast.name} />
+                                            </a>) :
                                                 (<User className='w-25 h-25 font-extralight  rounded-full border-1 border-white' />
 
                                                 )}
 
                                             <div className="flex flex-col justify-center items-start">
-                                                <span className='text-left font-bold'>{cast.name}</span>
+                                                <a className='text-left font-bold hover:underline' href={`${process.env.NEXT_PUBLIC_URL}/person/${cast?.id}`} target='_blank'>{cast.name}</a>
                                                 <span className='text-left text-xs'>{cast.character.split('(')[0]}</span>
                                             </div>
 
